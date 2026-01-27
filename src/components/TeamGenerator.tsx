@@ -42,9 +42,15 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
     const handleSave = async () => {
         if (!generatedTeams) return;
         setIsSaving(true);
-        await saveTeamHistory(clubId, generatedTeams);
-        setIsSaving(false);
-        router.push(`/clubs/${clubId}/history`);
+        try {
+            await saveTeamHistory(clubId, generatedTeams);
+            router.push(`/clubs/${clubId}/history`);
+        } catch (error) {
+            console.error('저장 실패:', error);
+            alert('팀 기록을 저장하는 중 오류가 발생했습니다.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (generatedTeams) {
