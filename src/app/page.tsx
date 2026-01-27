@@ -10,7 +10,7 @@ export default async function Home() {
   return (
     <main className="container" style={{ padding: '2rem 0' }}>
       <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>
-        농구 팀 생성기
+        농구 동호회 팀관리 프로그램 ver 0.2 Beta
       </h1>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
