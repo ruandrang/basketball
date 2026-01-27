@@ -1,0 +1,146 @@
+[
+  {
+    "id": "38f96507-2d01-44b1-9f66-727685fb3e49",
+    "name": "지상훈",
+    "age": 47,
+    "height": 180,
+    "position": "Guard",
+    "number": 79
+  },
+  {
+    "id": "de3c7139-62c8-4e50-ab06-c70eb4a99f24",
+    "name": "김랜돌",
+    "age": 44,
+    "height": 176,
+    "position": "Forward",
+    "number": 0
+  },
+  {
+    "id": "a4746adc-7952-4bb4-96aa-008f91c857ee",
+    "name": "김용철",
+    "age": 49,
+    "height": 180,
+    "position": "Forward",
+    "number": 0
+  },
+  {
+    "id": "bdb1121f-cf4c-4495-a9dd-a5963a7b9f87",
+    "name": "김현식",
+    "age": 40,
+    "height": 175,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "4c48fe6d-c68e-406b-9a13-07c38e068afb",
+    "name": "이타미",
+    "age": 47,
+    "height": 185,
+    "position": "Center",
+    "number": 0
+  },
+  {
+    "id": "d7771804-37c5-41cc-91c8-e9299cd6c8df",
+    "name": "서정현",
+    "age": 40,
+    "height": 170,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "462d4e93-b776-4d8d-9116-927b27a01045",
+    "name": "이승현",
+    "age": 45,
+    "height": 18,
+    "position": "Forward",
+    "number": 0
+  },
+  {
+    "id": "7de2c198-15c9-4c78-aeef-f25c73fe28ba",
+    "name": "서경훈",
+    "age": 47,
+    "height": 178,
+    "position": "Forward",
+    "number": 0
+  },
+  {
+    "id": "4b36304d-de3f-41fc-b765-0da90596530d",
+    "name": "김기억",
+    "age": 44,
+    "height": 175,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "840078e2-2c38-4a40-a8e5-db95dcb3dcea",
+    "name": "박상완",
+    "age": 37,
+    "height": 175,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "55b3dde8-7494-422c-8641-c3a686f037d2",
+    "name": "이건우",
+    "age": 43,
+    "height": 184,
+    "position": "Center",
+    "number": 0
+  },
+  {
+    "id": "41cd151e-784e-4707-ba53-725988ff729c",
+    "name": "김재섭",
+    "age": 40,
+    "height": 175,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "baa2d0b5-0f5d-48fa-a449-3ce5153224df",
+    "name": "박세희",
+    "age": 43,
+    "height": 175,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "5ecd1db5-7191-4454-96d5-eecbd156f90d",
+    "name": "박종찬",
+    "age": 44,
+    "height": 184,
+    "position": "Center",
+    "number": 0
+  },
+  {
+    "id": "4a6b5651-3e01-4720-964e-919bdab488e2",
+    "name": "박성훈",
+    "age": 44,
+    "height": 180,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "feb9233e-3818-4ecd-8c3d-2e6942ceceac",
+    "name": "서동일",
+    "age": 40,
+    "height": 185,
+    "position": "Center",
+    "number": 0
+  },
+  {
+    "id": "f51df50e-af90-495a-841b-94f883c84732",
+    "name": "김솔",
+    "age": 46,
+    "height": 173,
+    "position": "Guard",
+    "number": 0
+  },
+  {
+    "id": "5235ba47-78bb-49ea-9412-4c10cf7b8663",
+    "name": "이현준",
+    "age": 44,
+    "height": 180,
+    "position": "Forward",
+    "number": 0
+  }
+]
