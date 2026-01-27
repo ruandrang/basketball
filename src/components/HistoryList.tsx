@@ -39,9 +39,10 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
 
         setIsSubmitting(true);
         try {
-            const matches = (record.matches || generateMatches(record.teams)).map(match => ({
+            const currentMatches = record.matches || generateMatches(record.teams);
+            const matches = currentMatches.map(match => ({
                 ...match,
-                result: matchResults[match.id]
+                result: matchResults[match.id] || 'Draw'
             }));
 
             await updateMatchResult(clubId, recordId, matches);
