@@ -26,9 +26,9 @@ export function generateTeams(players: Member[], colors: [TeamColor, TeamColor, 
     // Or if we have surplus, some get >1.
 
     const teams: Team[] = [
-        { id: '1', name: `팀 ${colors[0]}`, color: colors[0], members: [], averageHeight: 0 },
-        { id: '2', name: `팀 ${colors[1]}`, color: colors[1], members: [], averageHeight: 0 },
-        { id: '3', name: `팀 ${colors[2]}`, color: colors[2], members: [], averageHeight: 0 },
+        { id: crypto.randomUUID(), name: `팀 ${colors[0]}`, color: colors[0], members: [], averageHeight: 0 },
+        { id: crypto.randomUUID(), name: `팀 ${colors[1]}`, color: colors[1], members: [], averageHeight: 0 },
+        { id: crypto.randomUUID(), name: `팀 ${colors[2]}`, color: colors[2], members: [], averageHeight: 0 },
     ];
 
     // Distribution Helper
