@@ -19,3 +19,13 @@ export async function saveTeamHistory(clubId: string, teams: Team[]) {
     await updateClub(club);
     revalidatePath(`/clubs/${clubId}/history`);
 }
+
+export async function deleteHistory(clubId: string, historyId: string) {
+    const club = await getClub(clubId);
+    if (!club) throw new Error('클럽을 찾을 수 없습니다.');
+
+    club.history = club.history.filter(h => h.id !== historyId);
+
+    await updateClub(club);
+    revalidatePath(`/clubs/${clubId}/history`);
+}

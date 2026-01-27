@@ -3,12 +3,14 @@
 import { HistoryRecord, TeamColor, Match } from '@/lib/types';
 import { useState, useMemo } from 'react';
 import { updateMatchResult } from '@/app/actions/results';
+import { deleteHistory } from '@/app/actions/history';
 
 export default function HistoryList({ history, clubId }: { history: HistoryRecord[], clubId: string }) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [matchResults, setMatchResults] = useState<Record<string, 'Team1Win' | 'Team2Win' | 'Draw'>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const toggle = (id: string) => {
         setExpandedId(expandedId === id ? null : id);
@@ -50,6 +52,22 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
             alert('저장 실패했습니다.');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (recordId: string) => {
+        if (!confirm('이 팀 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+            return;
+        }
+
+        setDeletingId(recordId);
+        try {
+            await deleteHistory(clubId, recordId);
+        } catch (e) {
+            console.error(e);
+            alert('삭제 실패했습니다.');
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -99,7 +117,7 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                         {isExpanded && (
                             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--color-border)' }}>
                                 {!isEditing && (
-                                    <div style={{ marginBottom: '1rem' }}>
+                                    <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
                                         <button
                                             className="btn btn-secondary"
                                             onClick={() => startEditing(record)}
@@ -107,8 +125,38 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                         >
                                             {hasResults ? '경기 결과 수정' : '경기 결과 입력'}
                                         </button>
+                                        <button
+                                            className="btn"
+                                            onClick={() => handleDelete(record.id)}
+                                            disabled={deletingId === record.id}
+                                            style={{
+                                                fontSize: '0.85rem',
+                                                background: '#DC2626',
+                                                border: '2px solid #EF4444',
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                opacity: deletingId === record.id ? 0.5 : 1,
+                                                cursor: deletingId === record.id ? 'not-allowed' : 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (deletingId !== record.id) {
+                                                    e.currentTarget.style.background = '#B91C1C';
+                                                    e.currentTarget.style.transform = 'scale(1.02)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (deletingId !== record.id) {
+                                                    e.currentTarget.style.background = '#DC2626';
+                                                    e.currentTarget.style.transform = 'scale(1)';
+                                                }
+                                            }}
+                                        >
+                                            {deletingId === record.id ? '삭제 중...' : '🗑️ 삭제'}
+                                        </button>
                                     </div>
                                 )}
+
 
                                 {isEditing && (
                                     <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255, 107, 0, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-accent-primary)' }}>
