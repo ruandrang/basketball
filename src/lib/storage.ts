@@ -35,31 +35,37 @@ export async function getClubs(): Promise<Club[]> {
 }
 
 export async function getClub(id: string): Promise<Club | undefined> {
-    const { data: club, error } = await supabase
-        .from('clubs')
-        .select(`
-            *,
-            members (*),
-            history_records (
+    try {
+        const { data: club, error } = await supabase
+            .from('clubs')
+            .select(`
                 *,
-                teams (
+                members (*),
+                history_records (
                     *,
-                    team_members (member_id)
-                ),
-                matches (*)
-            )
-        `)
-        .eq('id', id)
-        .single();
+                    teams (
+                        *,
+                        team_members (member_id)
+                    ),
+                    matches (*)
+                )
+            `)
+            .eq('id', id)
+            .single();
 
-    if (error) {
-        if (error.code !== 'PGRST116') { // Not found error
-            console.error('클럽 조회 실패:', error);
+        if (error) {
+            if (error.code !== 'PGRST116') { // Not found error
+                console.error('클럽 조회 실패:', error);
+            }
+            return undefined;
         }
+
+        if (!club) return undefined;
+        return transformSupabaseClub(club);
+    } catch (e) {
+        console.error('클럽 조회 중 예외 발생:', e);
         return undefined;
     }
-
-    return transformSupabaseClub(club);
 }
 
 export async function saveClubs(clubs: Club[]): Promise<void> {
@@ -104,29 +110,33 @@ export async function updateClub(updatedClub: Club): Promise<void> {
 
 // 헬퍼: Supabase 데이터를 Club 객체로 변환
 function transformSupabaseClub(dbClub: any): Club {
+    if (!dbClub) {
+        return { id: '', name: '', members: [], history: [] };
+    }
+
     const members = (dbClub.members || []).map((m: any) => ({
         id: m.id,
-        name: m.name,
-        age: m.age,
-        height: m.height,
-        position: m.position,
-        number: m.number,
+        name: m.name || '',
+        age: m.age || 0,
+        height: m.height || 0,
+        position: m.position || 'Forward',
+        number: m.number || 0,
         clubId: m.club_id
     }));
 
     const history = (dbClub.history_records || []).map((hr: any) => {
         // Teams 변환
-        const teams = (hr.teams || []).sort((a: any, b: any) => a.team_order - b.team_order).map((t: any) => {
+        const teams = (hr.teams || []).sort((a: any, b: any) => (a.team_order || 0) - (b.team_order || 0)).map((t: any) => {
             // Team Members 추출
             const teamMemberIds = (t.team_members || []).map((tm: any) => tm.member_id);
             const teamMembers = members.filter((m: any) => teamMemberIds.includes(m.id));
 
             return {
                 id: t.id,
-                name: t.name,
-                color: t.color,
+                name: t.name || '',
+                color: t.color || 'White',
                 members: teamMembers,
-                averageHeight: Number(t.average_height)
+                averageHeight: Number(t.average_height || 0)
             };
         });
 
@@ -140,15 +150,19 @@ function transformSupabaseClub(dbClub: any): Club {
 
         return {
             id: hr.id,
-            date: hr.date,
+            date: hr.date || new Date().toISOString(),
             teams: teams,
             matches: matches.length > 0 ? matches : undefined
         };
-    }).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }).sort((a: any, b: any) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+    });
 
     return {
-        id: dbClub.id,
-        name: dbClub.name,
+        id: dbClub.id || '',
+        name: dbClub.name || '',
         members: members,
         history: history
     };
