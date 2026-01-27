@@ -1,18 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { getClub, updateClub } from '@/lib/storage';
+import { supabase } from '@/lib/supabase';
 import { Member, Position } from '@/lib/types';
 
 export async function importMembers(clubId: string, csvData: string) {
-    const club = await getClub(clubId);
-    if (!club) throw new Error('클럽을 찾을 수 없습니다.');
-
     const lines = csvData.trim().split('\n');
-    const headers = lines[0].split(',');
     // Expected headers: name,age,height,position,number
 
-    const newMembers: Member[] = [];
+    const newMembersData = [];
 
     // Skip header
     for (let i = 1; i < lines.length; i++) {
@@ -23,8 +19,9 @@ export async function importMembers(clubId: string, csvData: string) {
         // Basic validation
         if (values.length < 5) continue;
 
-        newMembers.push({
+        newMembersData.push({
             id: crypto.randomUUID(),
+            club_id: clubId,
             name: values[0].trim(),
             age: parseInt(values[1].trim()) || 0,
             height: parseInt(values[2].trim()) || 0,
@@ -33,7 +30,13 @@ export async function importMembers(clubId: string, csvData: string) {
         });
     }
 
-    club.members.push(...newMembers);
-    await updateClub(club);
+    if (newMembersData.length > 0) {
+        const { error } = await supabase
+            .from('members')
+            .insert(newMembersData);
+        if (error) throw error;
+    }
+
     revalidatePath(`/clubs/${clubId}/members`);
+    revalidatePath(`/clubs/${clubId}/stats`);
 }

@@ -1,19 +1,17 @@
 'use server'
 
-import { getClub, updateClub } from '@/lib/storage';
-import { revalidatePath } from 'next/cache';
+import { updateMatchResults } from '@/lib/storage';
 import { Match } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
-export async function updateMatchResult(clubId: string, historyId: string, matches: Match[]) {
-    const club = await getClub(clubId);
-    if (!club) throw new Error('클럽을 찾을 수 없습니다.');
+export async function updateMatchResult(clubId: string, recordId: string, matches: Match[]) {
+    try {
+        await updateMatchResults(recordId, matches);
 
-    const historyRecord = club.history.find(h => h.id === historyId);
-    if (!historyRecord) throw new Error('기록을 찾을 수 없습니다.');
-
-    // Update matches
-    historyRecord.matches = matches;
-
-    await updateClub(club);
-    revalidatePath(`/clubs/${clubId}/history`);
+        revalidatePath(`/clubs/${clubId}/history`);
+        revalidatePath(`/clubs/${clubId}/stats`);
+    } catch (error) {
+        console.error('Failed to update match result:', error);
+        throw new Error('경기 결과 저장에 실패했습니다.');
+    }
 }

@@ -64,6 +64,26 @@ export default async function Home() {
           </div>
         </div>
       </div>
+      {/* Migration Tool - Hidden by default or for admin use */}
+      {clubs.length > 0 && (
+        <div style={{ marginTop: '4rem', padding: '2rem', borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+            기존 로컬 데이터를 데이터베이스로 이전하시겠습니까?
+          </p>
+          <button
+            className="btn btn-secondary"
+            onClick={async () => {
+              if (confirm('로컬 데이터를 Supabase로 이전하시겠습니까?')) {
+                const { migrateToSupabase } = await import('@/app/actions/migration');
+                const result = await migrateToSupabase();
+                alert(result.message);
+              }
+            }}
+          >
+            데이터베이스로 마이그레이션 실행
+          </button>
+        </div>
+      )}
     </main>
   );
 }
