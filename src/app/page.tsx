@@ -9,9 +9,14 @@ export default async function Home() {
 
   return (
     <main className="container" style={{ padding: '2rem 0' }}>
-      <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>
-        농구 동호회 팀관리 프로그램 ver 0.2 Beta
-      </h1>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+          농구 동호회 팀관리 프로그램 ver 0.2 Beta
+        </h1>
+        <p style={{ color: 'var(--color-accent-gold)', fontSize: '1.1rem', fontWeight: '500' }}>
+          아직은 베타 테스트중이니 마음껏 사용해 보세요
+        </p>
+      </div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h2>내 클럽 (My Clubs)</h2>
