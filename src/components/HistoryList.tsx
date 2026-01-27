@@ -263,9 +263,9 @@ function generateMatches(teams: any[]): Match[] {
     if (teams.length !== 3) return [];
 
     return [
-        { id: `${teams[0].id}-${teams[1].id}`, team1Id: teams[0].id, team2Id: teams[1].id },
-        { id: `${teams[0].id}-${teams[2].id}`, team1Id: teams[0].id, team2Id: teams[2].id },
-        { id: `${teams[1].id}-${teams[2].id}`, team1Id: teams[1].id, team2Id: teams[2].id },
+        { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id },
+        { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[2].id },
+        { id: crypto.randomUUID(), team1Id: teams[1].id, team2Id: teams[2].id },
     ];
 }
 
