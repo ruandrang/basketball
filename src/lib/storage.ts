@@ -5,29 +5,33 @@ import { Club, Member, HistoryRecord, Team, Match } from './types';
 // 기존의 파일 시스템 기반 함수들을 Supabase 쿼리로 대체합니다.
 
 export async function getClubs(): Promise<Club[]> {
-    const { data: clubs, error } = await supabase
-        .from('clubs')
-        .select(`
-            *,
-            members (*),
-            history_records (
+    try {
+        const { data: clubs, error } = await supabase
+            .from('clubs')
+            .select(`
                 *,
-                teams (
+                members (*),
+                history_records (
                     *,
-                    team_members (member_id)
-                ),
-                matches (*)
-            )
-        `)
-        .order('created_at', { ascending: false });
+                    teams (
+                        *,
+                        team_members (member_id)
+                    ),
+                    matches (*)
+                )
+            `)
+            .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('클럽 목록 조회 실패:', error);
+        if (error) {
+            console.error('클럽 목록 조회 실패:', error);
+            return [];
+        }
+
+        return (clubs || []).map(club => transformSupabaseClub(club));
+    } catch (e) {
+        console.error('데이터베이스 연결 실패:', e);
         return [];
     }
-
-    // Supabase 데이터를 기존 앱의 Club 인터페이스 형식으로 변환합니다.
-    return clubs.map(club => transformSupabaseClub(club));
 }
 
 export async function getClub(id: string): Promise<Club | undefined> {
