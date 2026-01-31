@@ -5,6 +5,21 @@ import { generateTeams } from '@/lib/generator';
 import { saveTeamHistory } from '@/app/actions/history';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+    closestCenter,
+    DndContext,
+    DragEndEvent,
+    DragOverEvent,
+    DragStartEvent,
+    PointerSensor,
+    TouchSensor,
+    useDroppable,
+    useSensor,
+    useSensors
+} from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/sortable';
 
 interface TeamGeneratorProps {
     clubId: string;
@@ -20,19 +35,42 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    // drag state (for UI highlight only)
-    const [dragging, setDragging] = useState<{ memberId: string; fromTeamId: string } | null>(null);
-    const [dragOver, setDragOver] = useState<{ teamId: string; index: number | null } | null>(null);
+    // dnd-kit (works on mobile)
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } })
+    );
+    const [activeId, setActiveId] = useState<string | null>(null);
 
     const totalSelectedMembers = useMemo(() => {
         return allMembers.filter(m => selectedIds.has(m.id));
     }, [allMembers, selectedIds]);
 
+    const MAX_SELECTED = 18;
+
     const toggleSelection = (id: string) => {
-        const next = new Set(selectedIds);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        setSelectedIds(next);
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) {
+                next.delete(id);
+                return next;
+            }
+            if (next.size >= MAX_SELECTED) {
+                alert(`최대 ${MAX_SELECTED}명까지만 선택할 수 있어요.`);
+                return prev;
+            }
+            next.add(id);
+            return next;
+        });
+    };
+
+    const handleSelectAll = () => {
+        const ids = allMembers.slice(0, MAX_SELECTED).map(m => m.id);
+        setSelectedIds(new Set(ids));
+    };
+
+    const handleClearAll = () => {
+        setSelectedIds(new Set());
     };
 
     const selectedCount = selectedIds.size;
@@ -61,58 +99,92 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
     };
 
     if (generatedTeams) {
-        const handleDragStart = (teamId: string, memberId: string) => {
-            setDragging({ fromTeamId: teamId, memberId });
+        const recomputeAvg = (team: Team) => {
+            const total = team.members.reduce((sum, mm) => sum + mm.height, 0);
+            team.averageHeight = team.members.length ? Math.round(total / team.members.length) : 0;
         };
 
-        const handleDragEnd = () => {
-            setDragging(null);
-            setDragOver(null);
+        const findTeamIdByItem = (teams: Team[], id: string): string | null => {
+            // droppable container id
+            if (teams.some(t => t.id === id)) return id;
+            // item id
+            for (const t of teams) {
+                if (t.members.some(m => m.id === id)) return t.id;
+            }
+            return null;
         };
 
-        const handleDrop = (toTeamId: string, toIndex: number | null) => {
-            if (!dragging) return;
+        const handleDragStart = (event: DragStartEvent) => {
+            setActiveId(String(event.active.id));
+        };
+
+        const handleDragOver = (event: DragOverEvent) => {
+            const { active, over } = event;
+            if (!over) return;
+
+            const activeItemId = String(active.id);
+            const overId = String(over.id);
 
             setGeneratedTeams(prev => {
                 if (!prev) return prev;
 
-                const { fromTeamId, memberId } = dragging;
-                if (fromTeamId === toTeamId && toIndex === null) return prev;
+                const fromTeamId = findTeamIdByItem(prev, activeItemId);
+                const toTeamId = findTeamIdByItem(prev, overId);
+                if (!fromTeamId || !toTeamId) return prev;
+                if (fromTeamId === toTeamId) return prev;
 
-                // clone
-                const nextTeams = prev.map(t => ({ ...t, members: [...t.members] }));
+                const next = prev.map(t => ({ ...t, members: [...t.members] }));
+                const fromTeam = next.find(t => t.id === fromTeamId)!;
+                const toTeam = next.find(t => t.id === toTeamId)!;
 
-                const fromTeam = nextTeams.find(t => t.id === fromTeamId);
-                const toTeam = nextTeams.find(t => t.id === toTeamId);
-                if (!fromTeam || !toTeam) return prev;
+                const fromIndex = fromTeam.members.findIndex(m => m.id === activeItemId);
+                if (fromIndex === -1) return prev;
 
-                const fromIdx = fromTeam.members.findIndex(m => m.id === memberId);
-                if (fromIdx === -1) return prev;
+                const overIndex = toTeam.members.findIndex(m => m.id === overId);
+                const insertIndex = overIndex === -1 ? toTeam.members.length : overIndex;
 
-                const [moved] = fromTeam.members.splice(fromIdx, 1);
-
-                // If dropping within same team, adjust index after removal
-                let insertIndex = toIndex ?? toTeam.members.length;
-                if (fromTeamId === toTeamId && toIndex !== null) {
-                    if (fromIdx < insertIndex) insertIndex -= 1;
-                }
-                insertIndex = Math.max(0, Math.min(insertIndex, toTeam.members.length));
-
+                const [moved] = fromTeam.members.splice(fromIndex, 1);
                 toTeam.members.splice(insertIndex, 0, moved);
 
-                // recompute average heights for affected teams
-                const recompute = (team: Team) => {
-                    const total = team.members.reduce((sum, mm) => sum + mm.height, 0);
-                    team.averageHeight = team.members.length ? Math.round(total / team.members.length) : 0;
-                };
-                recompute(fromTeam);
-                if (toTeam !== fromTeam) recompute(toTeam);
+                recomputeAvg(fromTeam);
+                recomputeAvg(toTeam);
 
-                return nextTeams;
+                return next;
             });
-
-            setDragOver(null);
         };
+
+        const handleDragEnd = (event: DragEndEvent) => {
+            const { active, over } = event;
+            setActiveId(null);
+            if (!over) return;
+
+            const activeItemId = String(active.id);
+            const overId = String(over.id);
+
+            setGeneratedTeams(prev => {
+                if (!prev) return prev;
+
+                const teamId = findTeamIdByItem(prev, activeItemId);
+                const overTeamId = findTeamIdByItem(prev, overId);
+                if (!teamId || !overTeamId) return prev;
+                if (teamId !== overTeamId) return prev; // cross-team already handled in onDragOver
+
+                const next = prev.map(t => ({ ...t, members: [...t.members] }));
+                const team = next.find(t => t.id === teamId)!;
+
+                const oldIndex = team.members.findIndex(m => m.id === activeItemId);
+                const newIndex = team.members.findIndex(m => m.id === overId);
+                if (oldIndex === -1 || newIndex === -1) return prev;
+
+                team.members = arrayMove(team.members, oldIndex, newIndex);
+                recomputeAvg(team);
+                return next;
+            });
+        };
+
+        const activeMember = activeId
+            ? generatedTeams.flatMap(t => t.members).find(m => m.id === activeId)
+            : undefined;
 
         return (
             <div className="container">
@@ -120,7 +192,7 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
                     <div>
                         <h1 className="text-gradient" style={{ fontSize: '2rem' }}>생성된 팀</h1>
                         <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-                            멤버를 <strong style={{ color: 'white' }}>드래그</strong>해서 팀 이동/순서 변경할 수 있어요.
+                            멤버를 <strong style={{ color: 'white' }}>드래그</strong>해서 팀 이동/순서 변경할 수 있어요. (모바일 터치 지원)
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
@@ -136,89 +208,51 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
                     </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                    {generatedTeams.map(team => (
-                        <div
-                            key={team.id}
-                            className="card"
-                            style={{
-                                borderColor: getColorHex(team.color),
-                                outline: dragOver?.teamId === team.id ? '2px solid var(--color-accent-primary)' : 'none',
-                                outlineOffset: '2px'
-                            }}
-                            onDragOver={(e) => {
-                                e.preventDefault();
-                                setDragOver({ teamId: team.id, index: null });
-                            }}
-                            onDrop={(e) => {
-                                e.preventDefault();
-                                handleDrop(team.id, null);
-                            }}
-                        >
-                            <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <span style={{ width: '20px', height: '20px', backgroundColor: getColorHex(team.color), borderRadius: '4px', border: '2px solid white' }}></span>
-                                {team.name}{' '}
-                                <span style={{ fontSize: '0.6em', color: 'var(--color-text-secondary)', marginTop: '4px', marginLeft: 'auto' }}>
-                                    평균: {team.averageHeight}cm
-                                </span>
-                            </h2>
-                            <ul style={{ listStyle: 'none' }}>
-                                {team.members.map((m, idx) => {
-                                    const isDragging = dragging?.memberId === m.id;
-                                    const isOverHere = dragOver?.teamId === team.id && dragOver?.index === idx;
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                        {generatedTeams.map(team => (
+                            <TeamColumn key={team.id} team={team} />
+                        ))}
+                    </div>
 
-                                    return (
-                                        <li
-                                            key={m.id}
-                                            draggable
-                                            onDragStart={() => handleDragStart(team.id, m.id)}
-                                            onDragEnd={handleDragEnd}
-                                            onDragOver={(e) => {
-                                                e.preventDefault();
-                                                setDragOver({ teamId: team.id, index: idx });
-                                            }}
-                                            onDrop={(e) => {
-                                                e.preventDefault();
-                                                handleDrop(team.id, idx);
-                                            }}
-                                            style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                padding: '0.6rem 0.25rem',
-                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                                cursor: 'grab',
-                                                opacity: isDragging ? 0.4 : 1,
-                                                background: isOverHere ? 'rgba(255, 107, 0, 0.12)' : 'transparent',
-                                                borderRadius: '6px'
-                                            }}
-                                        >
-                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>☰</span>
-                                                <span>
-                                                    {m.name}{' '}
-                                                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8em' }}>#{m.number}</span>
-                                                </span>
-                                            </span>
-                                            <span style={{ fontSize: '0.9em', color: 'var(--color-accent-gold)' }}>{m.position}</span>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
+                    {/* lightweight overlay */}
+                    {activeMember ? (
+                        <div
+                            style={{
+                                position: 'fixed',
+                                left: '-9999px',
+                                top: '-9999px'
+                            }}
+                        />
+                    ) : null}
+                </DndContext>
             </div>
         );
     }
 
     return (
         <div>
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>플레이어 선택</h1>
-                <p style={{ color: 'var(--color-text-secondary)' }}>
-                    선택됨: <strong style={{ color: selectedCount === 18 ? 'var(--color-success)' : 'white' }}>{selectedCount}</strong> / 18
-                </p>
+            <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div>
+                    <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>플레이어 선택</h1>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        선택됨: <strong style={{ color: selectedCount === 18 ? 'var(--color-success)' : 'white' }}>{selectedCount}</strong> / 18
+                    </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="btn btn-secondary" type="button" onClick={handleSelectAll}>
+                        전체 선택(18명)
+                    </button>
+                    <button className="btn btn-secondary" type="button" onClick={handleClearAll}>
+                        전체 해제
+                    </button>
+                </div>
             </div>
 
             {/* Color Selection */}
@@ -318,4 +352,70 @@ function getColorHex(color: TeamColor): string {
         'Green': '#10B981'
     };
     return colorMap[color];
+}
+
+function TeamColumn({ team }: { team: Team }) {
+    const { setNodeRef, isOver } = useDroppable({ id: team.id });
+    const memberIds = team.members.map(m => m.id);
+
+    return (
+        <div
+            ref={setNodeRef}
+            className="card"
+            style={{
+                borderColor: getColorHex(team.color),
+                outline: isOver ? '2px solid var(--color-accent-primary)' : 'none',
+                outlineOffset: '2px'
+            }}
+        >
+            <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ width: '20px', height: '20px', backgroundColor: getColorHex(team.color), borderRadius: '4px', border: '2px solid white' }} />
+                {team.name}{' '}
+                <span style={{ fontSize: '0.6em', color: 'var(--color-text-secondary)', marginTop: '4px', marginLeft: 'auto' }}>
+                    평균: {team.averageHeight}cm
+                </span>
+            </h2>
+
+            <SortableContext items={memberIds} strategy={verticalListSortingStrategy}>
+                <ul style={{ listStyle: 'none' }}>
+                    {team.members.map(m => (
+                        <SortableMemberRow key={m.id} member={m} />
+                    ))}
+                </ul>
+            </SortableContext>
+        </div>
+    );
+}
+
+function SortableMemberRow({ member }: { member: Member }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: member.id });
+
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '0.6rem 0.25rem',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        cursor: 'grab',
+        opacity: isDragging ? 0.5 : 1,
+        background: isDragging ? 'rgba(255, 107, 0, 0.12)' : 'transparent',
+        borderRadius: '6px',
+        // Important on iOS Safari: prevent scroll hijacking while dragging
+        touchAction: 'none'
+    };
+
+    return (
+        <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: 'var(--color-text-secondary)' }}>☰</span>
+                <span>
+                    {member.name}{' '}
+                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8em' }}>#{member.number}</span>
+                </span>
+            </span>
+            <span style={{ fontSize: '0.9em', color: 'var(--color-accent-gold)' }}>{member.position}</span>
+        </li>
+    );
 }
