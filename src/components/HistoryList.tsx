@@ -3,7 +3,7 @@
 import { HistoryRecord, TeamColor, Match } from '@/lib/types';
 import { useState, useMemo } from 'react';
 import { updateMatchResult } from '@/app/actions/results';
-import { deleteHistory } from '@/app/actions/history';
+import { deleteHistory, updateHistoryDate } from '@/app/actions/history';
 
 export default function HistoryList({ history, clubId }: { history: HistoryRecord[], clubId: string }) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -11,6 +11,10 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     const [matchResults, setMatchResults] = useState<Record<string, 'Team1Win' | 'Team2Win' | 'Draw'>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const [editingDateId, setEditingDateId] = useState<string | null>(null);
+    const [dateDraft, setDateDraft] = useState<string>('');
+    const [isUpdatingDate, setIsUpdatingDate] = useState(false);
 
     const toggle = (id: string) => {
         setExpandedId(expandedId === id ? null : id);
@@ -31,6 +35,33 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     const cancelEditing = () => {
         setEditingId(null);
         setMatchResults({});
+    };
+
+    const startEditingDate = (record: HistoryRecord) => {
+        setEditingDateId(record.id);
+        setDateDraft(toYmd(record.date));
+    };
+
+    const cancelEditingDate = () => {
+        setEditingDateId(null);
+        setDateDraft('');
+    };
+
+    const saveDate = async (recordId: string) => {
+        if (!dateDraft) {
+            alert('날짜를 선택해주세요.');
+            return;
+        }
+        setIsUpdatingDate(true);
+        try {
+            await updateHistoryDate(clubId, recordId, dateDraft);
+            setEditingDateId(null);
+        } catch (e) {
+            console.error(e);
+            alert('날짜 변경에 실패했습니다.');
+        } finally {
+            setIsUpdatingDate(false);
+        }
     };
 
     const saveResults = async (recordId: string) => {
@@ -79,7 +110,7 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     return (
         <div style={{ display: 'grid', gap: '1rem' }}>
             {history.map(record => {
-                const date = new Date(record.date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit' });
+                const date = formatKoreanDate(record.date);
                 const isExpanded = expandedId === record.id;
                 const isEditing = editingId === record.id;
                 const matches = record.matches || generateMatches(record.teams);
@@ -118,7 +149,7 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                         {isExpanded && (
                             <div style={{ padding: '1.5rem', borderTop: '1px solid var(--color-border)' }}>
                                 {!isEditing && (
-                                    <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                    <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                         <button
                                             className="btn btn-secondary"
                                             onClick={() => startEditing(record)}
@@ -126,6 +157,48 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                         >
                                             {hasResults ? '경기 결과 수정' : '경기 결과 입력'}
                                         </button>
+
+                                        {editingDateId === record.id ? (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <input
+                                                    type="date"
+                                                    value={dateDraft}
+                                                    onChange={(e) => setDateDraft(e.target.value)}
+                                                    style={{
+                                                        padding: '0.5rem',
+                                                        borderRadius: 'var(--radius-sm)',
+                                                        border: '1px solid var(--color-border)',
+                                                        background: 'var(--color-bg-primary)',
+                                                        color: 'white'
+                                                    }}
+                                                />
+                                                <button
+                                                    className="btn btn-primary"
+                                                    onClick={() => saveDate(record.id)}
+                                                    disabled={isUpdatingDate}
+                                                    style={{ fontSize: '0.85rem' }}
+                                                >
+                                                    {isUpdatingDate ? '저장 중...' : '날짜 저장'}
+                                                </button>
+                                                <button
+                                                    className="btn btn-secondary"
+                                                    onClick={cancelEditingDate}
+                                                    disabled={isUpdatingDate}
+                                                    style={{ fontSize: '0.85rem' }}
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                className="btn btn-secondary"
+                                                onClick={() => startEditingDate(record)}
+                                                style={{ fontSize: '0.85rem' }}
+                                            >
+                                                날짜 수정
+                                            </button>
+                                        )}
+
                                         <button
                                             className="btn"
                                             onClick={() => handleDelete(record.id)}
@@ -294,6 +367,24 @@ function calculateTeamStats(teams: any[], matches: Match[]) {
     });
 
     return stats;
+}
+
+function formatKoreanDate(dateIso: string) {
+    // 요일까지만 (시간 제거)
+    return new Date(dateIso).toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+    });
+}
+
+function toYmd(dateIso: string): string {
+    const d = new Date(dateIso);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 function getColorHex(color: TeamColor): string {

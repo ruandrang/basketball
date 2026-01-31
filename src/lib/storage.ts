@@ -280,6 +280,14 @@ export async function deleteHistory(historyId: string): Promise<void> {
     if (error) throw error;
 }
 
+export async function updateHistoryDate(historyId: string, dateIso: string): Promise<void> {
+    const { error } = await supabase()
+        .from('history_records')
+        .update({ date: dateIso })
+        .eq('id', historyId);
+    if (error) throw error;
+}
+
 export async function deleteClub(clubId: string): Promise<void> {
     // clubs.id 기준으로 삭제하면, FK ON DELETE CASCADE로
     // members / history_records 및 하위(teams, matches, team_members)까지 정리됩니다.

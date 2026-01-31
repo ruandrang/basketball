@@ -1,6 +1,6 @@
 'use server'
 
-import { saveHistory, deleteHistory as dbDeleteHistory } from '@/lib/storage';
+import { saveHistory, deleteHistory as dbDeleteHistory, updateHistoryDate as dbUpdateHistoryDate } from '@/lib/storage';
 import { Team, HistoryRecord } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
@@ -24,6 +24,15 @@ export async function saveTeamHistory(clubId: string, teams: Team[]) {
 
 export async function deleteHistory(clubId: string, historyId: string) {
     await dbDeleteHistory(historyId);
+    revalidatePath(`/clubs/${clubId}/history`);
+    revalidatePath(`/clubs/${clubId}/stats`);
+}
+
+export async function updateHistoryDate(clubId: string, historyId: string, ymd: string) {
+    // ymd: YYYY-MM-DD
+    // Store as timestamp with explicit +09:00 offset to avoid timezone drift
+    const iso = `${ymd}T00:00:00+09:00`;
+    await dbUpdateHistoryDate(historyId, iso);
     revalidatePath(`/clubs/${clubId}/history`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
