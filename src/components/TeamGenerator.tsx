@@ -3,7 +3,7 @@
 import { Member, Team, TeamColor } from '@/lib/types';
 import { generateTeams } from '@/lib/generator';
 import { saveTeamHistory } from '@/app/actions/history';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface TeamGeneratorProps {
@@ -20,6 +20,14 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
+    // drag state (for UI highlight only)
+    const [dragging, setDragging] = useState<{ memberId: string; fromTeamId: string } | null>(null);
+    const [dragOver, setDragOver] = useState<{ teamId: string; index: number | null } | null>(null);
+
+    const totalSelectedMembers = useMemo(() => {
+        return allMembers.filter(m => selectedIds.has(m.id));
+    }, [allMembers, selectedIds]);
+
     const toggleSelection = (id: string) => {
         const next = new Set(selectedIds);
         if (next.has(id)) next.delete(id);
@@ -34,8 +42,7 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
             alert('최소 3명의 플레이어를 선택해주세요.');
             return;
         }
-        const selectedMembers = allMembers.filter(m => selectedIds.has(m.id));
-        const teams = generateTeams(selectedMembers, teamColors);
+        const teams = generateTeams(totalSelectedMembers, teamColors);
         setGeneratedTeams(teams);
     };
 
@@ -54,10 +61,68 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
     };
 
     if (generatedTeams) {
+        const handleDragStart = (teamId: string, memberId: string) => {
+            setDragging({ fromTeamId: teamId, memberId });
+        };
+
+        const handleDragEnd = () => {
+            setDragging(null);
+            setDragOver(null);
+        };
+
+        const handleDrop = (toTeamId: string, toIndex: number | null) => {
+            if (!dragging) return;
+
+            setGeneratedTeams(prev => {
+                if (!prev) return prev;
+
+                const { fromTeamId, memberId } = dragging;
+                if (fromTeamId === toTeamId && toIndex === null) return prev;
+
+                // clone
+                const nextTeams = prev.map(t => ({ ...t, members: [...t.members] }));
+
+                const fromTeam = nextTeams.find(t => t.id === fromTeamId);
+                const toTeam = nextTeams.find(t => t.id === toTeamId);
+                if (!fromTeam || !toTeam) return prev;
+
+                const fromIdx = fromTeam.members.findIndex(m => m.id === memberId);
+                if (fromIdx === -1) return prev;
+
+                const [moved] = fromTeam.members.splice(fromIdx, 1);
+
+                // If dropping within same team, adjust index after removal
+                let insertIndex = toIndex ?? toTeam.members.length;
+                if (fromTeamId === toTeamId && toIndex !== null) {
+                    if (fromIdx < insertIndex) insertIndex -= 1;
+                }
+                insertIndex = Math.max(0, Math.min(insertIndex, toTeam.members.length));
+
+                toTeam.members.splice(insertIndex, 0, moved);
+
+                // recompute average heights for affected teams
+                const recompute = (team: Team) => {
+                    const total = team.members.reduce((sum, mm) => sum + mm.height, 0);
+                    team.averageHeight = team.members.length ? Math.round(total / team.members.length) : 0;
+                };
+                recompute(fromTeam);
+                if (toTeam !== fromTeam) recompute(toTeam);
+
+                return nextTeams;
+            });
+
+            setDragOver(null);
+        };
+
         return (
             <div className="container">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h1 className="text-gradient" style={{ fontSize: '2rem' }}>생성된 팀</h1>
+                    <div>
+                        <h1 className="text-gradient" style={{ fontSize: '2rem' }}>생성된 팀</h1>
+                        <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
+                            멤버를 <strong style={{ color: 'white' }}>드래그</strong>해서 팀 이동/순서 변경할 수 있어요.
+                        </p>
+                    </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <button className="btn btn-secondary" onClick={() => setGeneratedTeams(null)}>
                             뒤로
@@ -73,22 +138,72 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
                     {generatedTeams.map(team => (
-                        <div key={team.id} className="card" style={{ borderColor: getColorHex(team.color) }}>
+                        <div
+                            key={team.id}
+                            className="card"
+                            style={{
+                                borderColor: getColorHex(team.color),
+                                outline: dragOver?.teamId === team.id ? '2px solid var(--color-accent-primary)' : 'none',
+                                outlineOffset: '2px'
+                            }}
+                            onDragOver={(e) => {
+                                e.preventDefault();
+                                setDragOver({ teamId: team.id, index: null });
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                handleDrop(team.id, null);
+                            }}
+                        >
                             <h2 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span style={{ width: '20px', height: '20px', backgroundColor: getColorHex(team.color), borderRadius: '4px', border: '2px solid white' }}></span>
-                                {team.name} <span style={{ fontSize: '0.6em', color: 'var(--color-text-secondary)', float: 'right', marginTop: '4px' }}>평균: {team.averageHeight}cm</span>
+                                {team.name}{' '}
+                                <span style={{ fontSize: '0.6em', color: 'var(--color-text-secondary)', marginTop: '4px', marginLeft: 'auto' }}>
+                                    평균: {team.averageHeight}cm
+                                </span>
                             </h2>
                             <ul style={{ listStyle: 'none' }}>
-                                {team.members.map(m => (
-                                    <li key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <span>
-                                            {m.name} <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8em' }}>#{m.number}</span>
-                                        </span>
-                                        <span style={{ fontSize: '0.9em', color: 'var(--color-accent-gold)' }}>
-                                            {m.position}
-                                        </span>
-                                    </li>
-                                ))}
+                                {team.members.map((m, idx) => {
+                                    const isDragging = dragging?.memberId === m.id;
+                                    const isOverHere = dragOver?.teamId === team.id && dragOver?.index === idx;
+
+                                    return (
+                                        <li
+                                            key={m.id}
+                                            draggable
+                                            onDragStart={() => handleDragStart(team.id, m.id)}
+                                            onDragEnd={handleDragEnd}
+                                            onDragOver={(e) => {
+                                                e.preventDefault();
+                                                setDragOver({ teamId: team.id, index: idx });
+                                            }}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                handleDrop(team.id, idx);
+                                            }}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '0.6rem 0.25rem',
+                                                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                cursor: 'grab',
+                                                opacity: isDragging ? 0.4 : 1,
+                                                background: isOverHere ? 'rgba(255, 107, 0, 0.12)' : 'transparent',
+                                                borderRadius: '6px'
+                                            }}
+                                        >
+                                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>☰</span>
+                                                <span>
+                                                    {m.name}{' '}
+                                                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.8em' }}>#{m.number}</span>
+                                                </span>
+                                            </span>
+                                            <span style={{ fontSize: '0.9em', color: 'var(--color-accent-gold)' }}>{m.position}</span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ))}
