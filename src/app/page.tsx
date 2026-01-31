@@ -1,6 +1,5 @@
 import { getClubs } from '@/lib/storage';
 import { createClub } from '@/app/actions/club';
-import MigrationButton from '@/components/MigrationButton';
 import CreateClubForm from '@/components/CreateClubForm';
 
 export const dynamic = 'force-dynamic';
@@ -55,8 +54,6 @@ export default async function Home() {
           </div>
         </div>
       </div>
-      {/* Migration Tool */}
-      {clubs.length > 0 && <MigrationButton />}
     </main>
   );
 }
