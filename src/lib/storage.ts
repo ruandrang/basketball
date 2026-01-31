@@ -280,6 +280,16 @@ export async function deleteHistory(historyId: string): Promise<void> {
     if (error) throw error;
 }
 
+export async function deleteClub(clubId: string): Promise<void> {
+    // clubs.id 기준으로 삭제하면, FK ON DELETE CASCADE로
+    // members / history_records 및 하위(teams, matches, team_members)까지 정리됩니다.
+    const { error } = await supabase()
+        .from('clubs')
+        .delete()
+        .eq('id', clubId);
+    if (error) throw error;
+}
+
 export async function updateMatchResults(historyId: string, matches: Match[]): Promise<void> {
     for (const match of matches) {
         const { error } = await supabase()

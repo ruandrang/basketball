@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getClub, getClubs, saveClubs, updateClub } from '@/lib/storage';
+import { getClub, getClubs, saveClubs, updateClub, deleteClub as dbDeleteClub } from '@/lib/storage';
 
 export async function createClub(formData: FormData) {
     const name = formData.get('name') as string;
@@ -35,10 +35,7 @@ export async function updateClubName(clubId: string, newName: string) {
 }
 
 export async function deleteClub(clubId: string) {
-    const clubs = await getClubs();
-    const filteredClubs = clubs.filter(c => c.id !== clubId);
-
-    await saveClubs(filteredClubs);
+    await dbDeleteClub(clubId);
     revalidatePath('/');
-    return { success: true };
+    redirect('/');
 }
