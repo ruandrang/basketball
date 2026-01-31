@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { getClub, getClubs, saveClubs, updateClub, deleteClub as dbDeleteClub } from '@/lib/storage';
 
 export async function createClub(formData: FormData) {
@@ -37,5 +36,5 @@ export async function updateClubName(clubId: string, newName: string) {
 export async function deleteClub(clubId: string) {
     await dbDeleteClub(clubId);
     revalidatePath('/');
-    redirect('/');
+    return { success: true };
 }
