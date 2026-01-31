@@ -128,3 +128,27 @@ a {
   border-color: var(--color-text-secondary);
   color: var(--color-text-primary);
 }
+
+/* Loading */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: var(--color-accent-primary);
+  animation: spin 0.9s linear infinite;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.25);
+}
+
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  box-shadow: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

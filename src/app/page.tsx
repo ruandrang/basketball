@@ -1,6 +1,7 @@
 import { getClubs } from '@/lib/storage';
 import { createClub } from '@/app/actions/club';
 import MigrationButton from '@/components/MigrationButton';
+import CreateClubForm from '@/components/CreateClubForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,23 +51,7 @@ export default async function Home() {
             justifyContent: 'center',
             padding: '2rem'
           }}>
-            <form action={createClub} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '1rem' }}>
-              <h3>새 클럽 만들기</h3>
-              <input
-                name="name"
-                placeholder="클럽 이름 입력"
-                required
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg-primary)',
-                  color: 'white',
-                  width: '100%'
-                }}
-              />
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>생성</button>
-            </form>
+            <CreateClubForm action={createClub} />
           </div>
         </div>
       </div>
