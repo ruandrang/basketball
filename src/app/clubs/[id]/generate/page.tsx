@@ -23,7 +23,7 @@ export default async function ClubGeneratePage({ params }: PageProps) {
                     ← {club.name} 대시보드로
                 </a>
             </div>
-            <TeamGenerator clubId={club.id} allMembers={club.members} />
+            <TeamGenerator clubId={club.id} allMembers={club.members} history={club.history} />
         </main>
     );
 }

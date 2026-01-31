@@ -1,6 +1,6 @@
 'use client';
 
-import { Member, Team, TeamColor } from '@/lib/types';
+import { HistoryRecord, Member, Team, TeamColor } from '@/lib/types';
 import { generateTeams } from '@/lib/generator';
 import { saveTeamHistory } from '@/app/actions/history';
 import { useMemo, useState } from 'react';
@@ -24,11 +24,12 @@ import { useSortable } from '@dnd-kit/sortable';
 interface TeamGeneratorProps {
     clubId: string;
     allMembers: Member[];
+    history: HistoryRecord[];
 }
 
 const TEAM_COLORS: TeamColor[] = ['White', 'Black', 'Red', 'Blue', 'Yellow', 'Green'];
 
-export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps) {
+export default function TeamGenerator({ clubId, allMembers, history }: TeamGeneratorProps) {
     const router = useRouter();
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [teamColors, setTeamColors] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
@@ -80,7 +81,7 @@ export default function TeamGenerator({ clubId, allMembers }: TeamGeneratorProps
             alert('최소 3명의 플레이어를 선택해주세요.');
             return;
         }
-        const teams = generateTeams(totalSelectedMembers, teamColors);
+        const teams = generateTeams(totalSelectedMembers, teamColors, history);
         setGeneratedTeams(teams);
     };
 
