@@ -1,12 +1,17 @@
-import { supabase } from './supabase';
+import { createSupabaseServerClient } from './supabase';
 import { Club, Member, HistoryRecord, Team, Match } from './types';
+
+function supabase() {
+    // lazy init so missing env throws inside try/catch (and logs are clearer)
+    return createSupabaseServerClient();
+}
 
 // Supabase 통합을 위해 storage.ts를 완전히 재작성합니다.
 // 기존의 파일 시스템 기반 함수들을 Supabase 쿼리로 대체합니다.
 
 export async function getClubs(): Promise<Club[]> {
     try {
-        const { data: clubs, error } = await supabase
+        const { data: clubs, error } = await supabase()
             .from('clubs')
             .select(`
                 *,
@@ -36,7 +41,7 @@ export async function getClubs(): Promise<Club[]> {
 
 export async function getClub(id: string): Promise<Club | undefined> {
     try {
-        const { data: club, error } = await supabase
+        const { data: club, error } = await supabase()
             .from('clubs')
             .select(`
                 *,
@@ -79,7 +84,7 @@ export async function saveClubs(clubs: Club[]): Promise<void> {
 
 export async function updateClub(updatedClub: Club): Promise<void> {
     // 1. 클럽 정보 업데이트 (또는 삽입)
-    const { error: clubError } = await supabase
+    const { error: clubError } = await supabase()
         .from('clubs')
         .upsert({
             id: updatedClub.id,
@@ -92,11 +97,19 @@ export async function updateClub(updatedClub: Club): Promise<void> {
     // 기존 멤버와 비교하여 삭제된 멤버 처리 등 복잡한 로직이 필요할 수 있지만,
     // 여기서는 간단하게 모든 멤버를 upsert 합니다.
     if (updatedClub.members.length > 0) {
-        const { error: memberError } = await supabase
+        const { error: memberError } = await supabase()
             .from('members')
+            // NOTE: Member 타입에 clubId(카멜케이스)가 있을 수 있어 spread하면
+            // PostgREST가 members.clubId 컬럼을 찾으려다(PGRST204) 실패합니다.
+            // DB 컬럼명(club_id)에 맞춰 명시적으로 매핑합니다.
             .upsert(updatedClub.members.map(m => ({
-                ...m,
-                club_id: updatedClub.id
+                id: m.id,
+                club_id: updatedClub.id,
+                name: m.name,
+                age: m.age,
+                height: m.height,
+                position: m.position,
+                number: m.number,
             })));
         if (memberError) throw memberError;
     }
@@ -170,7 +183,7 @@ function transformSupabaseClub(dbClub: any): Club {
 
 // 개별 엔티티를 CRUD 하는 함수들을 추가로 제공하여 성능을 최적화할 수 있습니다.
 export async function addMember(clubId: string, member: Member): Promise<void> {
-    const { error } = await supabase
+    const { error } = await supabase()
         .from('members')
         .insert({
             id: member.id,
@@ -185,7 +198,7 @@ export async function addMember(clubId: string, member: Member): Promise<void> {
 }
 
 export async function updateMember(member: Member): Promise<void> {
-    const { error } = await supabase
+    const { error } = await supabase()
         .from('members')
         .update({
             name: member.name,
@@ -199,7 +212,7 @@ export async function updateMember(member: Member): Promise<void> {
 }
 
 export async function deleteMember(memberId: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await supabase()
         .from('members')
         .delete()
         .eq('id', memberId);
@@ -208,7 +221,7 @@ export async function deleteMember(memberId: string): Promise<void> {
 
 export async function saveHistory(clubId: string, record: HistoryRecord): Promise<void> {
     // 1. History record 생성
-    const { error: hrError } = await supabase
+    const { error: hrError } = await supabase()
         .from('history_records')
         .insert({
             id: record.id,
@@ -220,7 +233,7 @@ export async function saveHistory(clubId: string, record: HistoryRecord): Promis
     // 2. Teams 생성
     for (let i = 0; i < record.teams.length; i++) {
         const team = record.teams[i];
-        const { error: teamError } = await supabase
+        const { error: teamError } = await supabase()
             .from('teams')
             .insert({
                 id: team.id,
@@ -237,7 +250,7 @@ export async function saveHistory(clubId: string, record: HistoryRecord): Promis
             team_id: team.id,
             member_id: m.id
         }));
-        const { error: tmError } = await supabase
+        const { error: tmError } = await supabase()
             .from('team_members')
             .insert(teamMembers);
         if (tmError) throw tmError;
@@ -252,7 +265,7 @@ export async function saveHistory(clubId: string, record: HistoryRecord): Promis
             team2_id: m.team2Id,
             result: m.result
         }));
-        const { error: mError } = await supabase
+        const { error: mError } = await supabase()
             .from('matches')
             .insert(supabaseMatches);
         if (mError) throw mError;
@@ -260,7 +273,7 @@ export async function saveHistory(clubId: string, record: HistoryRecord): Promis
 }
 
 export async function deleteHistory(historyId: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await supabase()
         .from('history_records')
         .delete()
         .eq('id', historyId);
@@ -269,7 +282,7 @@ export async function deleteHistory(historyId: string): Promise<void> {
 
 export async function updateMatchResults(historyId: string, matches: Match[]): Promise<void> {
     for (const match of matches) {
-        const { error } = await supabase
+        const { error } = await supabase()
             .from('matches')
             .upsert({
                 id: match.id,

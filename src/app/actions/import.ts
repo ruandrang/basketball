@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { supabase } from '@/lib/supabase';
+import { createSupabaseServerClient } from '@/lib/supabase';
 import { Member, Position } from '@/lib/types';
 
 export async function importMembers(clubId: string, csvData: string) {
@@ -31,6 +31,7 @@ export async function importMembers(clubId: string, csvData: string) {
     }
 
     if (newMembersData.length > 0) {
+        const supabase = createSupabaseServerClient();
         const { error } = await supabase
             .from('members')
             .insert(newMembersData);
