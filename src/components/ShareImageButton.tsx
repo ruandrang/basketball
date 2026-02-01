@@ -26,8 +26,9 @@ export default function ShareImageButton({
       // html-to-image는 요소의 client box 기준으로 캡처해서,
       // 가로로 넘치는 경우(3팀 그리드 등) 오른쪽이 잘릴 수 있음.
       // scrollWidth/scrollHeight로 캡처 영역을 강제로 확장한다.
-      const width = Math.ceil(el.scrollWidth);
-      const height = Math.ceil(el.scrollHeight);
+      const rect = el.getBoundingClientRect();
+      const width = Math.ceil(Math.max(el.scrollWidth, rect.width)) + 24; // safety padding
+      const height = Math.ceil(Math.max(el.scrollHeight, rect.height)) + 24;
 
       const dataUrl = await toPng(el, {
         cacheBust: true,
@@ -35,11 +36,7 @@ export default function ShareImageButton({
         backgroundColor: '#0B0E13',
         width,
         height,
-        style: {
-          transform: 'none',
-          transformOrigin: 'top left',
-        },
-      });
+      } as any);
 
       const a = document.createElement('a');
       a.href = dataUrl;

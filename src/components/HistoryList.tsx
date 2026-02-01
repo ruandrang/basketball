@@ -395,7 +395,17 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                 )}
 
                                 <div style={{ marginBottom: '1.25rem' }}>
-                                    <div id={`share-${record.id}`} style={{ maxWidth: 980, margin: '0 auto' }}>
+                                    <div
+                                      id={`share-${record.id}`}
+                                      style={{
+                                        width: 980,
+                                        maxWidth: '100%',
+                                        margin: '0 auto',
+                                        padding: 12,
+                                        boxSizing: 'border-box',
+                                        overflow: 'visible',
+                                      }}
+                                    >
                                         <ShareCard record={record} clubName={clubName} />
                                     </div>
                                 </div>
