@@ -28,7 +28,7 @@ export async function getClub(id: string): Promise<Club | undefined> {
         if (!club) return undefined;
 
         const members = await query<any>(
-            'SELECT * FROM members WHERE club_id = $1',
+            'SELECT * FROM members WHERE club_id = $1 ORDER BY sort_order ASC, created_at ASC',
             [id]
         );
 
@@ -102,7 +102,8 @@ function transformMember(m: any): Member {
         age: m.age || 0,
         height: m.height || 0,
         position: m.position || 'SF',
-        number: m.number || 0
+        number: m.number || 0,
+        sortOrder: m.sort_order ?? 0,
     };
 }
 
@@ -132,11 +133,20 @@ export async function updateClub(updatedClub: Club): Promise<void> {
     }
 }
 
+export async function getNextMemberSortOrder(clubId: string): Promise<number> {
+    const row = await queryOne<{ next: number }>(
+        'SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM members WHERE club_id = $1',
+        [clubId]
+    );
+    return row?.next ?? 1;
+}
+
 export async function addMember(clubId: string, member: Member): Promise<void> {
+    const sortOrder = typeof member.sortOrder === 'number' ? member.sortOrder : await getNextMemberSortOrder(clubId);
     await execute(
-        `INSERT INTO members (id, club_id, name, age, height, position, number)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [member.id, clubId, member.name, member.age, member.height, member.position, member.number]
+        `INSERT INTO members (id, club_id, name, age, height, position, number, sort_order)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [member.id, clubId, member.name, member.age, member.height, member.position, member.number, sortOrder]
     );
 }
 
@@ -146,6 +156,17 @@ export async function updateMember(member: Member): Promise<void> {
          WHERE id = $6`,
         [member.name, member.age, member.height, member.position, member.number, member.id]
     );
+}
+
+export async function updateMemberSortOrders(clubId: string, orderedMemberIds: string[]): Promise<void> {
+    await withTransaction(async (client) => {
+        for (let i = 0; i < orderedMemberIds.length; i++) {
+            await client.query(
+                'UPDATE members SET sort_order = $1 WHERE club_id = $2 AND id = $3',
+                [i + 1, clubId, orderedMemberIds[i]]
+            );
+        }
+    });
 }
 
 export async function deleteMember(memberId: string): Promise<void> {

@@ -8,6 +8,7 @@ export interface Member {
     height: number;
     position: Position;
     number: number;
+    sortOrder?: number;
 }
 
 export interface Team {
