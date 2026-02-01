@@ -13,8 +13,12 @@ CREATE TABLE IF NOT EXISTS members (
     age INTEGER DEFAULT 0,
     height INTEGER DEFAULT 0,
     position VARCHAR(50) DEFAULT 'SF',
-    number INTEGER DEFAULT 0
+    number INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0
 );
+
+-- ensure new columns exist even on existing installs
+ALTER TABLE members ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS history_records (
     id UUID PRIMARY KEY,
