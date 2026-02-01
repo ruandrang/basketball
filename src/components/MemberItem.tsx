@@ -80,20 +80,7 @@ export default function MemberItem({ clubId, member, onEdit }: MemberItemProps) 
                 </div>
             </div>
 
-            <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
-                    <span>등번호</span>
-                    <strong style={{ color: 'white' }}>#{member.number}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', marginTop: '0.35rem' }}>
-                    <span>포지션</span>
-                    <strong style={{ color: 'white' }}>{member.position}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', marginTop: '0.35rem' }}>
-                    <span>키 / 나이</span>
-                    <strong style={{ color: 'white' }}>{member.height}cm · {member.age}세</strong>
-                </div>
-            </div>
+            {/* 하단 상세는 상단 배지와 중복이므로 제거 */}
         </div>
     );
 }
