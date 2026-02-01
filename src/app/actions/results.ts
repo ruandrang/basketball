@@ -1,12 +1,12 @@
 'use server'
 
-import { updateMatchResults } from '@/lib/storage';
+import { replaceMatchResults } from '@/lib/storage';
 import { Match } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
 export async function updateMatchResult(clubId: string, recordId: string, matches: Match[]) {
     try {
-        await updateMatchResults(recordId, matches);
+        await replaceMatchResults(recordId, matches);
 
         revalidatePath(`/clubs/${clubId}/history`);
         revalidatePath(`/clubs/${clubId}/stats`);

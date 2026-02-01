@@ -9,6 +9,8 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [matchResults, setMatchResults] = useState<Record<string, 'Team1Win' | 'Team2Win' | 'Draw'>>({});
+    const [editingMatches, setEditingMatches] = useState<Match[]>([]);
+    const [newMatchPair, setNewMatchPair] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -26,6 +28,14 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
 
         // Initialize matches if they don't exist
         const matches = record.matches || generateMatches(record.teams);
+        setEditingMatches(matches);
+        // default pair selector
+        if (record.teams.length === 3) {
+            setNewMatchPair(`${record.teams[0].id}|${record.teams[1].id}`);
+        } else {
+            setNewMatchPair('');
+        }
+
         matches.forEach(match => {
             initialResults[match.id] = match.result || 'Draw';
         });
@@ -35,6 +45,8 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     const cancelEditing = () => {
         setEditingId(null);
         setMatchResults({});
+        setEditingMatches([]);
+        setNewMatchPair('');
     };
 
     const startEditingDate = (record: HistoryRecord) => {
@@ -70,8 +82,7 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
 
         setIsSubmitting(true);
         try {
-            const currentMatches = record.matches || generateMatches(record.teams);
-            const matches = currentMatches.map(match => ({
+            const matches = editingMatches.map(match => ({
                 ...match,
                 result: matchResults[match.id] || 'Draw'
             }));
@@ -79,6 +90,8 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
             await updateMatchResult(clubId, recordId, matches);
             setEditingId(null);
             setMatchResults({});
+            setEditingMatches([]);
+            setNewMatchPair('');
         } catch (e) {
             console.error(e);
             alert('저장 실패했습니다.');
@@ -114,6 +127,7 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                 const isExpanded = expandedId === record.id;
                 const isEditing = editingId === record.id;
                 const matches = record.matches || generateMatches(record.teams);
+                const editingList = isEditing ? editingMatches : matches;
                 const hasResults = matches.some(m => m.result !== undefined);
 
                 // Calculate team stats from matches
@@ -234,15 +248,16 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
 
                                 {isEditing && (
                                     <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255, 107, 0, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-accent-primary)' }}>
-                                        <h4 style={{ marginBottom: '1rem' }}>경기 결과 입력 (총 {matches.length}경기)</h4>
+                                        <h4 style={{ marginBottom: '1rem' }}>경기 결과 입력 (총 {editingList.length}경기)</h4>
+
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-                                            {matches.map(match => {
+                                            {editingList.map(match => {
                                                 const team1 = record.teams.find(t => t.id === match.team1Id)!;
                                                 const team2 = record.teams.find(t => t.id === match.team2Id)!;
 
                                                 return (
                                                     <div key={match.id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-sm)' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.75rem' }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                                                                 <span style={{ width: '16px', height: '16px', backgroundColor: getColorHex(team1.color), borderRadius: '3px' }}></span>
                                                                 <span style={{ fontWeight: 'bold' }}>{team1.name}</span>
@@ -252,7 +267,27 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                                                 <span style={{ width: '16px', height: '16px', backgroundColor: getColorHex(team2.color), borderRadius: '3px' }}></span>
                                                                 <span style={{ fontWeight: 'bold' }}>{team2.name}</span>
                                                             </div>
+
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-secondary"
+                                                                disabled={editingList.length <= 1}
+                                                                onClick={() => {
+                                                                    // remove match
+                                                                    setEditingMatches(prev => prev.filter(m => m.id !== match.id));
+                                                                    setMatchResults(prev => {
+                                                                        const next = { ...prev };
+                                                                        delete next[match.id];
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                                style={{ padding: '0.35rem 0.6rem', fontSize: '0.8rem' }}
+                                                                title="경기 삭제"
+                                                            >
+                                                                삭제
+                                                            </button>
                                                         </div>
+
                                                         <select
                                                             value={matchResults[match.id] || 'Draw'}
                                                             onChange={(e) => setMatchResults({ ...matchResults, [match.id]: e.target.value as any })}
@@ -274,6 +309,62 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                                 );
                                             })}
                                         </div>
+
+                                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                                            {record.teams.length === 3 ? (
+                                                <>
+                                                    <select
+                                                        value={newMatchPair}
+                                                        onChange={(e) => setNewMatchPair(e.target.value)}
+                                                        style={{
+                                                            padding: '0.5rem',
+                                                            borderRadius: 'var(--radius-sm)',
+                                                            border: '1px solid var(--color-border)',
+                                                            background: 'var(--color-bg-primary)',
+                                                            color: 'white',
+                                                            fontSize: '0.9rem'
+                                                        }}
+                                                    >
+                                                        {[
+                                                            [record.teams[0], record.teams[1]],
+                                                            [record.teams[0], record.teams[2]],
+                                                            [record.teams[1], record.teams[2]],
+                                                        ].map(([a, b]) => (
+                                                            <option key={`${a.id}|${b.id}`} value={`${a.id}|${b.id}`}>
+                                                                {a.name} vs {b.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-secondary"
+                                                        onClick={() => {
+                                                            const [aId, bId] = newMatchPair.split('|');
+                                                            const id = crypto.randomUUID();
+                                                            setEditingMatches(prev => [...prev, { id, team1Id: aId, team2Id: bId }]);
+                                                            setMatchResults(prev => ({ ...prev, [id]: 'Draw' }));
+                                                        }}
+                                                        style={{ fontSize: '0.85rem' }}
+                                                    >
+                                                        + 경기 추가
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-secondary"
+                                                    onClick={() => {
+                                                        const id = crypto.randomUUID();
+                                                        setEditingMatches(prev => [...prev, { id, team1Id: record.teams[0].id, team2Id: record.teams[1].id }]);
+                                                        setMatchResults(prev => ({ ...prev, [id]: 'Draw' }));
+                                                    }}
+                                                    style={{ fontSize: '0.85rem' }}
+                                                >
+                                                    + 경기 추가
+                                                </button>
+                                            )}
+                                        </div>
+
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             <button
                                                 className="btn btn-primary"
