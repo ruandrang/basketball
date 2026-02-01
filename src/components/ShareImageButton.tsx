@@ -22,19 +22,42 @@ export default function ShareImageButton({
     }
 
     setBusy(true);
-    try {
-      // html-to-image는 요소의 client box 기준으로 캡처해서,
-      // 가로로 넘치는 경우(3팀 그리드 등) 오른쪽이 잘릴 수 있음.
-      // scrollWidth/scrollHeight로 캡처 영역을 강제로 확장한다.
-      const rect = el.getBoundingClientRect();
-      const width = Math.ceil(Math.max(el.scrollWidth, rect.width)) + 24; // safety padding
-      const height = Math.ceil(Math.max(el.scrollHeight, rect.height)) + 24;
+    let sandbox: HTMLDivElement | null = null;
 
-      const dataUrl = await toPng(el, {
+    try {
+      // 브라우저 폭/레이아웃에 영향을 받지 않게,
+      // 고정 폭(980px)으로 offscreen에 클론을 만들어 그걸 캡처한다.
+      const FIXED_WIDTH = 980;
+
+      sandbox = document.createElement('div');
+      sandbox.style.position = 'fixed';
+      sandbox.style.left = '-10000px';
+      sandbox.style.top = '0';
+      sandbox.style.width = `${FIXED_WIDTH}px`;
+      sandbox.style.padding = '12px';
+      sandbox.style.boxSizing = 'border-box';
+      sandbox.style.background = '#0B0E13';
+      sandbox.style.zIndex = '-1';
+
+      const clone = el.cloneNode(true) as HTMLElement;
+      // 고정 폭 강제 + overflow 방지
+      clone.style.width = '100%';
+      clone.style.maxWidth = '100%';
+      clone.style.overflow = 'visible';
+
+      sandbox.appendChild(clone);
+      document.body.appendChild(sandbox);
+
+      // layout flush
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+
+      const height = Math.ceil(Math.max(sandbox.scrollHeight, clone.scrollHeight, clone.getBoundingClientRect().height)) + 12;
+
+      const dataUrl = await toPng(sandbox, {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: '#0B0E13',
-        width,
+        width: FIXED_WIDTH,
         height,
       } as any);
 
@@ -46,6 +69,7 @@ export default function ShareImageButton({
       console.error(e);
       alert('이미지 생성에 실패했습니다.');
     } finally {
+      if (sandbox) sandbox.remove();
       setBusy(false);
     }
   };
