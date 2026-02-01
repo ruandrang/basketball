@@ -4,8 +4,10 @@ import { HistoryRecord, TeamColor, Match } from '@/lib/types';
 import { useState, useMemo } from 'react';
 import { updateMatchResult } from '@/app/actions/results';
 import { deleteHistory, updateHistoryDate } from '@/app/actions/history';
+import ShareImageButton from '@/components/ShareImageButton';
+import ShareCard from '@/components/ShareCard';
 
-export default function HistoryList({ history, clubId }: { history: HistoryRecord[], clubId: string }) {
+export default function HistoryList({ history, clubId, clubName }: { history: HistoryRecord[], clubId: string, clubName: string }) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [matchResults, setMatchResults] = useState<Record<string, 'Team1Win' | 'Team2Win' | 'Draw'>>({});
@@ -171,6 +173,12 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                         >
                                             {hasResults ? '경기 결과 수정' : '경기 결과 입력'}
                                         </button>
+
+                                        <ShareImageButton
+                                            targetId={`share-${record.id}`}
+                                            filename={`${clubName}-${toYmd(record.date)}.png`}
+                                            label="이미지 저장"
+                                        />
 
                                         {editingDateId === record.id ? (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -385,6 +393,12 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
                                         </div>
                                     </div>
                                 )}
+
+                                <div style={{ marginBottom: '1.25rem' }}>
+                                    <div id={`share-${record.id}`} style={{ maxWidth: 980, margin: '0 auto' }}>
+                                        <ShareCard record={record} clubName={clubName} />
+                                    </div>
+                                </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
                                     {record.teams.map(team => {
