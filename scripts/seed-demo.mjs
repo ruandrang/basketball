@@ -6,7 +6,7 @@
  * - 20 events(history_records)
  * - teams + team_members
  * - multiple matches per event
- * - attendance for each event
+ * - (attendance removed)
  *
  * Usage:
  *   DATABASE_URL=... node scripts/seed-demo.mjs
@@ -67,7 +67,7 @@ async function main() {
 
   // wipe existing data
   console.log('[seed] wiping existing data...');
-  await client.query('TRUNCATE TABLE attendance_members, matches, team_members, teams, history_records, members, clubs RESTART IDENTITY CASCADE');
+  await client.query('TRUNCATE TABLE matches, team_members, teams, history_records, members, clubs RESTART IDENTITY CASCADE');
 
   const clubId = crypto.randomUUID();
   await client.query('INSERT INTO clubs (id, name) VALUES ($1, $2)', [clubId, CLUB_NAME]);
@@ -111,18 +111,10 @@ async function main() {
 
     await client.query('INSERT INTO history_records (id, club_id, date) VALUES ($1,$2,$3)', [historyId, clubId, dateIso]);
 
-    // attendance: pick 12~20 attendees
+    // attendees: pick 12~20 members for teams
     const attendees = shuffle(memberIds).slice(0, randInt(12, 20));
-    for (const mid of memberIds) {
-      const state = attendees.includes(mid) ? 'attend' : (Math.random() < 0.2 ? 'absent' : null);
-      if (!state) continue;
-      await client.query(
-        'INSERT INTO attendance_members (history_id, member_id, state) VALUES ($1,$2,$3)',
-        [historyId, mid, state]
-      );
-    }
 
-    // 2 teams for seeded demo (fits your default 5:5; attendance count varies)
+    // 2 teams for seeded demo (fits your default 5:5)
     const teamAId = crypto.randomUUID();
     const teamBId = crypto.randomUUID();
 
