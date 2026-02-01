@@ -22,42 +22,31 @@ export default function ShareImageButton({
     }
 
     setBusy(true);
-    let sandbox: HTMLDivElement | null = null;
+
+    // Temporarily force the *real* element to a fixed width, render it,
+    // capture, then restore. This avoids clone/offscreen rendering quirks that
+    // can produce a blank (black) image.
+    const FIXED_WIDTH = 980;
+
+    const prev = {
+      width: (el as HTMLElement).style.width,
+      maxWidth: (el as HTMLElement).style.maxWidth,
+      overflow: (el as HTMLElement).style.overflow,
+    };
 
     try {
-      // 브라우저 폭/레이아웃에 영향을 받지 않게,
-      // 고정 폭(980px)으로 offscreen에 클론을 만들어 그걸 캡처한다.
-      const FIXED_WIDTH = 980;
+      const node = el as HTMLElement;
+      node.style.width = `${FIXED_WIDTH}px`;
+      node.style.maxWidth = `${FIXED_WIDTH}px`;
+      node.style.overflow = 'visible';
 
-      sandbox = document.createElement('div');
-      // Put it at (0,0) so the browser definitely lays it out/paints it,
-      // but make it invisible & non-interactive.
-      sandbox.style.position = 'fixed';
-      sandbox.style.left = '0';
-      sandbox.style.top = '0';
-      sandbox.style.width = `${FIXED_WIDTH}px`;
-      sandbox.style.padding = '12px';
-      sandbox.style.boxSizing = 'border-box';
-      sandbox.style.background = '#0B0E13';
-      sandbox.style.opacity = '0';
-      sandbox.style.pointerEvents = 'none';
-      sandbox.style.zIndex = '2147483647';
-
-      const clone = el.cloneNode(true) as HTMLElement;
-      // 고정 폭 강제 + overflow 방지
-      clone.style.width = '100%';
-      clone.style.maxWidth = '100%';
-      clone.style.overflow = 'visible';
-
-      sandbox.appendChild(clone);
-      document.body.appendChild(sandbox);
-
-      // layout flush
+      // let layout settle
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
       await new Promise((r) => requestAnimationFrame(() => r(null)));
 
-      const height = Math.ceil(Math.max(sandbox.scrollHeight, clone.scrollHeight, clone.getBoundingClientRect().height)) + 12;
+      const height = Math.ceil(Math.max(node.scrollHeight, node.getBoundingClientRect().height)) + 24;
 
-      const dataUrl = await toPng(sandbox, {
+      const dataUrl = await toPng(node, {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: '#0B0E13',
@@ -73,7 +62,10 @@ export default function ShareImageButton({
       console.error(e);
       alert('이미지 생성에 실패했습니다.');
     } finally {
-      if (sandbox) sandbox.remove();
+      const node = el as HTMLElement;
+      node.style.width = prev.width;
+      node.style.maxWidth = prev.maxWidth;
+      node.style.overflow = prev.overflow;
       setBusy(false);
     }
   };
