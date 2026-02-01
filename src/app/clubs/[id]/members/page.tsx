@@ -2,6 +2,7 @@ import { getClub } from '@/lib/storage';
 import { notFound } from 'next/navigation';
 import MemberManagement from '@/components/MemberManagement';
 import CsvTools from '@/components/CsvTools';
+import HistoryJsonTools from '@/components/HistoryJsonTools';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,8 @@ export default async function ClubMembersPage({ params }: PageProps) {
             <div style={{ marginBottom: '1rem' }}>
                 <CsvTools clubId={club.id} members={club.members} />
             </div>
+
+            <HistoryJsonTools clubId={club.id} />
 
             <MemberManagement clubId={club.id} members={club.members} history={club.history} />
         </main>
