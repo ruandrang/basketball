@@ -6,15 +6,19 @@ import { revalidatePath } from 'next/cache';
 
 export async function saveTeamHistory(clubId: string, teams: Team[]) {
     const recordId = crypto.randomUUID();
+    const matches = teams.length === 2
+        ? [{ id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id }]
+        : [
+            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id },
+            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[2].id },
+            { id: crypto.randomUUID(), team1Id: teams[1].id, team2Id: teams[2].id },
+        ];
+
     const newRecord: HistoryRecord = {
         id: recordId,
         date: new Date().toISOString(),
         teams: teams,
-        matches: [
-            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id },
-            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[2].id },
-            { id: crypto.randomUUID(), team1Id: teams[1].id, team2Id: teams[2].id },
-        ]
+        matches,
     };
 
     await saveHistory(clubId, newRecord);

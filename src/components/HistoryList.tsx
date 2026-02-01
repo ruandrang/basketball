@@ -332,15 +332,21 @@ export default function HistoryList({ history, clubId }: { history: HistoryRecor
     );
 }
 
-// Generate all possible matches for 3 teams
+// Generate matches skeleton (2-team or 3-team)
 function generateMatches(teams: any[]): Match[] {
-    if (teams.length !== 3) return [];
+    if (teams.length === 2) {
+        return [{ id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id }];
+    }
 
-    return [
-        { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id },
-        { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[2].id },
-        { id: crypto.randomUUID(), team1Id: teams[1].id, team2Id: teams[2].id },
-    ];
+    if (teams.length === 3) {
+        return [
+            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[1].id },
+            { id: crypto.randomUUID(), team1Id: teams[0].id, team2Id: teams[2].id },
+            { id: crypto.randomUUID(), team1Id: teams[1].id, team2Id: teams[2].id },
+        ];
+    }
+
+    return [];
 }
 
 // Calculate wins/draws/losses for each team based on matches

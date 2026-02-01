@@ -102,7 +102,7 @@ function transformMember(m: any): Member {
         name: m.name || '',
         age: m.age || 0,
         height: m.height || 0,
-        position: m.position || 'Forward',
+        position: m.position || 'SF',
         number: m.number || 0
     };
 }
