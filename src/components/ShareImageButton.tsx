@@ -26,7 +26,7 @@ export default function ShareImageButton({
     // Temporarily force the *real* element to a fixed width, render it,
     // capture, then restore. This avoids clone/offscreen rendering quirks that
     // can produce a blank (black) image.
-    const FIXED_WIDTH = 980;
+    const FIXED_WIDTH = 600;
 
     const prev = {
       width: (el as HTMLElement).style.width,

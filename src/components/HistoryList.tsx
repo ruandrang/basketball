@@ -398,7 +398,7 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                     <div
                                       id={`share-${record.id}`}
                                       style={{
-                                        width: 980,
+                                        width: 600,
                                         maxWidth: '100%',
                                         margin: '0 auto',
                                         padding: 12,
