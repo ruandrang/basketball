@@ -49,7 +49,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
         return allMembers.filter(m => selectedIds.has(m.id));
     }, [allMembers, selectedIds]);
 
-    const MAX_SELECTED = 30;
+    const MAX_SELECTED = 18;
 
     const toggleSelection = (id: string) => {
         setSelectedIds(prev => {
