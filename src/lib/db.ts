@@ -8,12 +8,14 @@ function getPool(): Pool {
         if (!connectionString) {
             throw new Error('Missing DATABASE_URL environment variable');
         }
+        // NOTE: On Vercel/serverless, keep pool size small to avoid exhausting
+        // Supabase Postgres connections. Prefer using Supabase's pooled (PgBouncer) URL.
         pool = new Pool({
             connectionString,
             ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-            max: 10,
+            max: Number(process.env.PGPOOL_MAX ?? 1),
             idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
+            connectionTimeoutMillis: 10000,
         });
     }
     return pool;
