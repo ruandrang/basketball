@@ -41,7 +41,13 @@ export default function MemberManagement({ clubId, members }: MemberManagementPr
                 </button>
             </div>
 
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div
+                style={{
+                    display: 'grid',
+                    gap: '1rem',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))'
+                }}
+            >
                 {members.length === 0 ? (
                     <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
                         <p style={{ color: 'var(--color-text-secondary)' }}>등록된 멤버가 없습니다.</p>
