@@ -30,14 +30,18 @@ export default function ShareImageButton({
       const FIXED_WIDTH = 980;
 
       sandbox = document.createElement('div');
+      // Put it at (0,0) so the browser definitely lays it out/paints it,
+      // but make it invisible & non-interactive.
       sandbox.style.position = 'fixed';
-      sandbox.style.left = '-10000px';
+      sandbox.style.left = '0';
       sandbox.style.top = '0';
       sandbox.style.width = `${FIXED_WIDTH}px`;
       sandbox.style.padding = '12px';
       sandbox.style.boxSizing = 'border-box';
       sandbox.style.background = '#0B0E13';
-      sandbox.style.zIndex = '-1';
+      sandbox.style.opacity = '0';
+      sandbox.style.pointerEvents = 'none';
+      sandbox.style.zIndex = '2147483647';
 
       const clone = el.cloneNode(true) as HTMLElement;
       // 고정 폭 강제 + overflow 방지
