@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS members (
     name VARCHAR(255) NOT NULL,
     age INTEGER DEFAULT 0,
     height INTEGER DEFAULT 0,
-    position VARCHAR(50) DEFAULT 'Forward',
+    position VARCHAR(50) DEFAULT 'SF',
     number INTEGER DEFAULT 0
 );
 
