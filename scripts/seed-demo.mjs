@@ -96,8 +96,8 @@ async function main() {
     const number = i; // unique jersey #
 
     await client.query(
-      'INSERT INTO members (id, club_id, name, age, height, position, number) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-      [id, clubId, name, age, height, position, number]
+      'INSERT INTO members (id, club_id, name, age, height, position, number, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+      [id, clubId, name, age, height, position, number, i]
     );
   }
 
