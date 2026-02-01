@@ -11,24 +11,30 @@ type MemberStats = {
 
 export function generateTeams(
     players: Member[],
-    colors: [TeamColor, TeamColor, TeamColor],
-    history: HistoryRecord[] = []
+    colors: TeamColor[],
+    history: HistoryRecord[] = [],
+    teamCount: number = 2
 ): Team[] {
     // 목표: 포지션은 골고루 + (5게임 이상 데이터가 있는 멤버는) 승률까지 고려해서
     //       너무 이기는 멤버만 한 팀에 몰리지 않게 분산
 
     const stats = computeMemberStats(players, history);
 
-    const centers = players.filter(p => p.position === 'Center');
-    const others = players.filter(p => p.position !== 'Center');
-    const forwards = others.filter(p => p.position === 'Forward');
-    const guards = others.filter(p => p.position === 'Guard');
+    const centers = players.filter(p => p.position === 'C');
+    const others = players.filter(p => p.position !== 'C');
+    const forwards = others.filter(p => p.position === 'SF' || p.position === 'PF');
+    const guards = others.filter(p => p.position === 'PG' || p.position === 'SG');
 
-    const teams: Team[] = [
-        { id: crypto.randomUUID(), name: `팀 ${colors[0]}`, color: colors[0], members: [], averageHeight: 0 },
-        { id: crypto.randomUUID(), name: `팀 ${colors[1]}`, color: colors[1], members: [], averageHeight: 0 },
-        { id: crypto.randomUUID(), name: `팀 ${colors[2]}`, color: colors[2], members: [], averageHeight: 0 },
-    ];
+    const safeTeamCount = Math.max(2, Math.min(teamCount, 3));
+    const palette = colors.length >= safeTeamCount ? colors : ['White', 'Black', 'Red'];
+
+    const teams: Team[] = Array.from({ length: safeTeamCount }).map((_, i) => ({
+        id: crypto.randomUUID(),
+        name: `팀 ${palette[i]}`,
+        color: palette[i] as TeamColor,
+        members: [],
+        averageHeight: 0,
+    }));
 
     const shuffle = <T>(array: T[]) => array.sort(() => Math.random() - 0.5);
 
