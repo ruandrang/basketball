@@ -12,9 +12,15 @@ CREATE TABLE IF NOT EXISTS members (
     name VARCHAR(255) NOT NULL,
     age INTEGER DEFAULT 0,
     height INTEGER DEFAULT 0,
-    position VARCHAR(50) DEFAULT 'Forward',
-    number INTEGER DEFAULT 0
+    position VARCHAR(50) DEFAULT 'SF',
+    number INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- ensure new columns exist even on existing installs
+ALTER TABLE members ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
 CREATE TABLE IF NOT EXISTS history_records (
     id UUID PRIMARY KEY,

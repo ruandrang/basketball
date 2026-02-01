@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getClub } from '@/lib/storage';
 import { notFound } from 'next/navigation';
 import TeamGenerator from '@/components/TeamGenerator';
@@ -19,9 +20,9 @@ export default async function ClubGeneratePage({ params }: PageProps) {
     return (
         <main className="container" style={{ padding: '2rem 0' }}>
             <div style={{ marginBottom: '1rem' }}>
-                <a href={`/clubs/${club.id}/dashboard`} style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                <Link href={`/clubs/${club.id}/dashboard`} style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
                     ← {club.name} 대시보드로
-                </a>
+                </Link>
             </div>
             <TeamGenerator clubId={club.id} allMembers={club.members} history={club.history} />
         </main>

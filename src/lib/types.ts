@@ -1,4 +1,4 @@
-export type Position = 'Guard' | 'Forward' | 'Center';
+export type Position = 'PG' | 'SG' | 'SF' | 'PF' | 'C';
 export type TeamColor = 'White' | 'Black' | 'Red' | 'Blue' | 'Yellow' | 'Green';
 
 export interface Member {
@@ -8,6 +8,7 @@ export interface Member {
     height: number;
     position: Position;
     number: number;
+    sortOrder?: number;
 }
 
 export interface Team {

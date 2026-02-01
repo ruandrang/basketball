@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache';
-import { addMember as dbAddMember, updateMember as dbUpdateMember, deleteMember as dbDeleteMember } from '@/lib/storage';
+import { addMember as dbAddMember, updateMember as dbUpdateMember, deleteMember as dbDeleteMember, updateMemberSortOrders } from '@/lib/storage';
 import { Member, Position } from '@/lib/types';
 
 export async function addMember(clubId: string, formData: FormData) {
@@ -41,4 +41,9 @@ export async function deleteMember(clubId: string, memberId: string) {
     await dbDeleteMember(memberId);
     revalidatePath(`/clubs/${clubId}/members`);
     revalidatePath(`/clubs/${clubId}/stats`);
+}
+
+export async function reorderMembers(clubId: string, orderedMemberIds: string[]) {
+    await updateMemberSortOrders(clubId, orderedMemberIds);
+    revalidatePath(`/clubs/${clubId}/members`);
 }
