@@ -141,10 +141,7 @@ export default function ClubDashboardClient({ clubId, clubName, memberCount, his
                 <h2>대시보드</h2>
                 <p>원하는 작업을 선택하세요.</p>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                    <a href={`/clubs/${clubId}/attendance`} className="btn btn-primary" style={{ textDecoration: 'none' }}>
-                        출첵 (Attendance)
-                    </a>
-                    <a href={`/clubs/${clubId}/generate`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+                    <a href={`/clubs/${clubId}/generate`} className="btn btn-primary" style={{ textDecoration: 'none' }}>
                         팀 생성하기 (Generate)
                     </a>
                     <a href={`/clubs/${clubId}/members`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>

@@ -25,18 +25,14 @@ interface TeamGeneratorProps {
     clubId: string;
     allMembers: Member[];
     history: HistoryRecord[];
-    initialSelectedIds?: string[];
-    initialTeamCount?: 2 | 3;
 }
 
 const TEAM_COLORS: TeamColor[] = ['White', 'Black', 'Red', 'Blue', 'Yellow', 'Green'];
 
-export default function TeamGenerator({ clubId, allMembers, history, initialSelectedIds, initialTeamCount }: TeamGeneratorProps) {
+export default function TeamGenerator({ clubId, allMembers, history }: TeamGeneratorProps) {
     const router = useRouter();
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(
-        new Set(initialSelectedIds ?? [])
-    );
-    const [teamCount, setTeamCount] = useState<2 | 3>(initialTeamCount ?? 2);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [teamCount, setTeamCount] = useState<2 | 3>(2);
     const [teamColors2, setTeamColors2] = useState<[TeamColor, TeamColor]>(['White', 'Black']);
     const [teamColors3, setTeamColors3] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);

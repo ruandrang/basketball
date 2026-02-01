@@ -45,15 +45,6 @@ CREATE TABLE IF NOT EXISTS matches (
     result VARCHAR(50)
 );
 
--- Attendance (uses history_records as the "event" table)
-CREATE TABLE IF NOT EXISTS attendance_members (
-    history_id UUID NOT NULL REFERENCES history_records(id) ON DELETE CASCADE,
-    member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    state VARCHAR(10) NOT NULL CHECK (state IN ('attend', 'absent')),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    PRIMARY KEY (history_id, member_id)
-);
-
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_members_club_id ON members(club_id);
 CREATE INDEX IF NOT EXISTS idx_history_records_club_id ON history_records(club_id);
@@ -61,5 +52,3 @@ CREATE INDEX IF NOT EXISTS idx_teams_history_id ON teams(history_id);
 CREATE INDEX IF NOT EXISTS idx_team_members_team_id ON team_members(team_id);
 CREATE INDEX IF NOT EXISTS idx_team_members_member_id ON team_members(member_id);
 CREATE INDEX IF NOT EXISTS idx_matches_history_id ON matches(history_id);
-CREATE INDEX IF NOT EXISTS idx_attendance_members_history_id ON attendance_members(history_id);
-CREATE INDEX IF NOT EXISTS idx_attendance_members_member_id ON attendance_members(member_id);
