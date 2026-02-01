@@ -46,6 +46,7 @@
 - nickname
 - position (`PG`|`SG`|`SF`|`PF`|`C`)
 - status (active/inactive 등)
+- **privacy_json** (선택, P1): 연락처/민감정보 공개 범위 설정용
 - created_at
 
 ### attendances (모임)
@@ -93,3 +94,10 @@
 - v0.1은 승/패만 기록하므로 `game_scores`, `player_stats`는 보류
 - 한 모임에서 여러 game을 허용하려면 `games.attendance_id`로 연결만 해두면 됨(회차 라벨 없이 리스트로 쌓임)
 - 클럽별 프로필을 위해 user와 club_member를 분리(권장)
+
+## Benchmark-driven P1 candidates (SportEasy 참고)
+추후 확장 시 아래 테이블/엔티티 추가 가능:
+- `messages`, `threads` (클럽 공지 / 이벤트별 스레드)
+- `tasks` (이벤트/모임별 담당자 지정)
+- `fee_collections`, `payments` (회비/참가비 수금)
+- `events` (attendance를 포함하는 상위 이벤트 모델로 확장: 훈련/경기/회식 등)
