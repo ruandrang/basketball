@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { reorderMembers } from '@/app/actions';
 import { POSITIONS, Position } from '@/lib/positions';
+import { computeWinStatsForMembers } from '@/lib/member-stats';
 import {
     DndContext,
     DragEndEvent,
@@ -26,15 +27,16 @@ import { CSS } from '@dnd-kit/utilities';
 interface MemberManagementProps {
     clubId: string;
     members: Member[];
+    history: import('@/lib/types').HistoryRecord[];
 }
 
-export default function MemberManagement({ clubId, members }: MemberManagementProps) {
+export default function MemberManagement({ clubId, members, history }: MemberManagementProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<Member | undefined>(undefined);
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-    const [sortMode, setSortMode] = useState<'custom' | 'position'>('custom');
+    const [sortMode, setSortMode] = useState<'custom' | 'positionAsc' | 'positionDesc' | 'winRateDesc' | 'winRateAsc'>('custom');
     const [customOrder, setCustomOrder] = useState<string[]>(() => members.map(m => m.id));
     const [isReordering, setIsReordering] = useState(false);
 
@@ -59,13 +61,28 @@ export default function MemberManagement({ clubId, members }: MemberManagementPr
         return map;
     }, [members]);
 
+    const winStatsMap = useMemo(() => computeWinStatsForMembers(history), [history]);
+
     const sortedMembers = useMemo(() => {
-        if (sortMode === 'position') {
-            const posIndex = new Map<Position, number>(POSITIONS.map((p, i) => [p as Position, i]));
+        const posIndex = new Map<Position, number>(POSITIONS.map((p, i) => [p as Position, i]));
+
+        if (sortMode === 'positionAsc' || sortMode === 'positionDesc') {
             return [...members].sort((a, b) => {
                 const ai = posIndex.get(a.position as Position) ?? 999;
                 const bi = posIndex.get(b.position as Position) ?? 999;
-                if (ai !== bi) return ai - bi;
+                if (ai !== bi) return sortMode === 'positionAsc' ? ai - bi : bi - ai;
+                return (a.number ?? 0) - (b.number ?? 0);
+            });
+        }
+
+        if (sortMode === 'winRateDesc' || sortMode === 'winRateAsc') {
+            return [...members].sort((a, b) => {
+                const ar = winStatsMap[a.id]?.winRate ?? -1;
+                const br = winStatsMap[b.id]?.winRate ?? -1;
+                if (ar !== br) return sortMode === 'winRateDesc' ? br - ar : ar - br;
+                const ag = winStatsMap[a.id]?.games ?? 0;
+                const bg = winStatsMap[b.id]?.games ?? 0;
+                if (ag !== bg) return bg - ag;
                 return (a.number ?? 0) - (b.number ?? 0);
             });
         }
@@ -81,7 +98,7 @@ export default function MemberManagement({ clubId, members }: MemberManagementPr
             if (!customOrder.includes(m.id)) ordered.push(m);
         }
         return ordered;
-    }, [members, membersById, customOrder, sortMode]);
+    }, [members, membersById, customOrder, sortMode, winStatsMap]);
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
@@ -132,7 +149,10 @@ export default function MemberManagement({ clubId, members }: MemberManagementPr
                             }}
                         >
                             <option value="custom">사용자 지정(드래그)</option>
-                            <option value="position">포지션별(PG→C)</option>
+                            <option value="positionAsc">포지션별 (PG→C)</option>
+                            <option value="positionDesc">포지션별 (C→PG)</option>
+                            <option value="winRateDesc">승률 높은 순</option>
+                            <option value="winRateAsc">승률 낮은 순</option>
                         </select>
                         {sortMode === 'custom' && isReordering && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>저장 중...</div>

@@ -29,7 +29,7 @@ export default async function ClubMembersPage({ params }: PageProps) {
                 <CsvTools clubId={club.id} members={club.members} />
             </div>
 
-            <MemberManagement clubId={club.id} members={club.members} />
+            <MemberManagement clubId={club.id} members={club.members} history={club.history} />
         </main>
     );
 }
