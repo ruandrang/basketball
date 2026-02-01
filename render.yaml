@@ -10,7 +10,8 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    # Ensure schema exists on first boot (Render Postgres starts empty)
+    startCommand: node scripts/ensure-schema.mjs && npm run start
     envVars:
       - key: DATABASE_URL
         fromDatabase:
