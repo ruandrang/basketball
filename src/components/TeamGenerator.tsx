@@ -32,7 +32,7 @@ const TEAM_COLORS: TeamColor[] = ['White', 'Black', 'Red', 'Blue', 'Yellow', 'Gr
 export default function TeamGenerator({ clubId, allMembers, history }: TeamGeneratorProps) {
     const router = useRouter();
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-    const [teamCount, setTeamCount] = useState<2 | 3>(2);
+    const [teamCount, setTeamCount] = useState<2 | 3>(3);
     const [teamColors2, setTeamColors2] = useState<[TeamColor, TeamColor]>(['White', 'Black']);
     const [teamColors3, setTeamColors3] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
@@ -290,8 +290,8 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                                 color: 'white'
                             }}
                         >
-                            <option value={2}>2팀 (기본)</option>
-                            <option value={3}>3팀</option>
+                            <option value={3}>3팀 (기본)</option>
+                            <option value={2}>2팀</option>
                         </select>
                     </div>
                 </div>
