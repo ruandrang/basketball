@@ -2,12 +2,15 @@
 
 import { HistoryRecord, TeamColor, Match } from '@/lib/types';
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { updateMatchResult } from '@/app/actions/results';
 import { deleteHistory, updateHistoryDate } from '@/app/actions/history';
 import ShareImageButton from '@/components/ShareImageButton';
 import ShareCard from '@/components/ShareCard';
 
 export default function HistoryList({ history, clubId, clubName }: { history: HistoryRecord[], clubId: string, clubName: string }) {
+    const router = useRouter();
+
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [matchResults, setMatchResults] = useState<Record<string, 'Team1Win' | 'Team2Win' | 'Draw'>>({});
@@ -90,6 +93,12 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
             }));
 
             await updateMatchResult(clubId, recordId, matches);
+
+            // Make the updated results visible immediately on this screen.
+            // Server action revalidates the path, but client components still need a refresh
+            // to pull the new server-rendered data.
+            router.refresh();
+
             setEditingId(null);
             setMatchResults({});
             setEditingMatches([]);
