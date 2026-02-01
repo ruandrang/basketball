@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { reorderMembers } from '@/app/actions';
 import { POSITIONS, Position } from '@/lib/positions';
-import { computeWinStatsForMembers } from '@/lib/member-stats';
+import { computeParticipationForMembers, computeWinStatsForMembers } from '@/lib/member-stats';
 import {
     DndContext,
     DragEndEvent,
@@ -36,7 +36,7 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
-    const [sortMode, setSortMode] = useState<'custom' | 'positionAsc' | 'positionDesc' | 'winRateDesc' | 'winRateAsc'>('custom');
+    const [sortMode, setSortMode] = useState<'custom' | 'positionAsc' | 'positionDesc' | 'winRateDesc' | 'winRateAsc' | 'participationDesc' | 'participationAsc'>('custom');
     const [customOrder, setCustomOrder] = useState<string[]>(() => members.map(m => m.id));
     const [isReordering, setIsReordering] = useState(false);
 
@@ -62,6 +62,7 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
     }, [members]);
 
     const winStatsMap = useMemo(() => computeWinStatsForMembers(history), [history]);
+    const participationMap = useMemo(() => computeParticipationForMembers(history), [history]);
 
     const sortedMembers = useMemo(() => {
         const posIndex = new Map<Position, number>(POSITIONS.map((p, i) => [p as Position, i]));
@@ -87,6 +88,18 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
             });
         }
 
+        if (sortMode === 'participationDesc' || sortMode === 'participationAsc') {
+            return [...members].sort((a, b) => {
+                const ar = participationMap[a.id]?.participationRate ?? -1;
+                const br = participationMap[b.id]?.participationRate ?? -1;
+                if (ar !== br) return sortMode === 'participationDesc' ? br - ar : ar - br;
+                const ap = participationMap[a.id]?.eventsPlayed ?? 0;
+                const bp = participationMap[b.id]?.eventsPlayed ?? 0;
+                if (ap !== bp) return bp - ap;
+                return (a.number ?? 0) - (b.number ?? 0);
+            });
+        }
+
         // custom order
         const ordered: Member[] = [];
         for (const id of customOrder) {
@@ -98,7 +111,7 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
             if (!customOrder.includes(m.id)) ordered.push(m);
         }
         return ordered;
-    }, [members, membersById, customOrder, sortMode, winStatsMap]);
+    }, [members, membersById, customOrder, sortMode, winStatsMap, participationMap]);
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
@@ -153,6 +166,8 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
                             <option value="positionDesc">포지션별 (C→PG)</option>
                             <option value="winRateDesc">승률 높은 순</option>
                             <option value="winRateAsc">승률 낮은 순</option>
+                            <option value="participationDesc">참석률(참여율) 높은 순</option>
+                            <option value="participationAsc">참석률(참여율) 낮은 순</option>
                         </select>
                         {sortMode === 'custom' && isReordering && (
                             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>저장 중...</div>
