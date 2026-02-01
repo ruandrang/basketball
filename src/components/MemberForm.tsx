@@ -1,7 +1,7 @@
 'use client';
 
 import { addMember, updateMember } from '@/app/actions';
-import { Member, Position } from '@/lib/types';
+import { Member } from '@/lib/types';
 import { useState } from 'react';
 
 interface MemberFormProps {
@@ -88,12 +88,14 @@ export default function MemberForm({ clubId, initialData, onClose }: MemberFormP
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>포지션</label>
                             <select
                                 name="position"
-                                defaultValue={initialData?.position || 'Forward'}
+                                defaultValue={initialData?.position || 'SF'}
                                 style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
                             >
-                                <option value="Guard">가드 (Guard)</option>
-                                <option value="Forward">포워드 (Forward)</option>
-                                <option value="Center">센터 (Center)</option>
+                                <option value="PG">포인트 가드 (PG)</option>
+                                <option value="SG">슈팅 가드 (SG)</option>
+                                <option value="SF">스몰 포워드 (SF)</option>
+                                <option value="PF">파워 포워드 (PF)</option>
+                                <option value="C">센터 (C)</option>
                             </select>
                         </div>
                     </div>
