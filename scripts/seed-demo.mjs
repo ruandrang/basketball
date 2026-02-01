@@ -111,12 +111,13 @@ async function main() {
 
     await client.query('INSERT INTO history_records (id, club_id, date) VALUES ($1,$2,$3)', [historyId, clubId, dateIso]);
 
-    // attendees: pick 12~20 members for teams
-    const attendees = shuffle(memberIds).slice(0, randInt(12, 20));
+    // attendees: pick exactly 15 members (3 teams x 5)
+    const attendees = shuffle(memberIds).slice(0, 15);
 
-    // 2 teams for seeded demo (fits your default 5:5)
+    // 3 teams (default colors: White/Black/Red)
     const teamAId = crypto.randomUUID();
     const teamBId = crypto.randomUUID();
+    const teamCId = crypto.randomUUID();
 
     await client.query(
       'INSERT INTO teams (id, history_id, name, color, average_height, team_order) VALUES ($1,$2,$3,$4,$5,$6)',
@@ -126,20 +127,14 @@ async function main() {
       'INSERT INTO teams (id, history_id, name, color, average_height, team_order) VALUES ($1,$2,$3,$4,$5,$6)',
       [teamBId, historyId, '팀 Black', 'Black', 0, 1]
     );
-
-    // team split (try to put 1 center each if possible)
-    const attMembers = attendees;
-    const centers = attMembers.filter((id) => true); // placeholder, we'll fetch positions quickly
+    await client.query(
+      'INSERT INTO teams (id, history_id, name, color, average_height, team_order) VALUES ($1,$2,$3,$4,$5,$6)',
+      [teamCId, historyId, '팀 Red', 'Red', 0, 2]
+    );
 
     // Fetch member positions for attendees
-    const rows = await client.query('SELECT id, position, height FROM members WHERE id = ANY($1::uuid[])', [attMembers]);
-    const byPos = {
-      C: [],
-      PF: [],
-      SF: [],
-      SG: [],
-      PG: [],
-    };
+    const rows = await client.query('SELECT id, position, height FROM members WHERE id = ANY($1::uuid[])', [attendees]);
+    const byPos = { C: [], PF: [], SF: [], SG: [], PG: [] };
     const heightMap = new Map();
     for (const r of rows.rows) {
       heightMap.set(r.id, Number(r.height) || 0);
@@ -149,11 +144,15 @@ async function main() {
 
     const teamA = [];
     const teamB = [];
+    const teamC = [];
 
+    // 1 center per team if possible
     const c1 = byPos.C.pop();
     const c2 = byPos.C.pop();
+    const c3 = byPos.C.pop();
     if (c1) teamA.push(c1);
     if (c2) teamB.push(c2);
+    if (c3) teamC.push(c3);
 
     const rest = shuffle([
       ...byPos.PG,
@@ -163,32 +162,57 @@ async function main() {
       ...byPos.C,
     ]);
 
-    // alternate fill
-    for (let i = 0; i < rest.length; i++) {
-      (i % 2 === 0 ? teamA : teamB).push(rest[i]);
+    // round-robin fill
+    const teams = [teamA, teamB, teamC];
+    let idx = 0;
+    for (const mid of rest) {
+      teams[idx % 3].push(mid);
+      idx++;
     }
 
+    // Ensure exactly 5 per team (in case centers were missing/excess)
+    // If any team has >5, move extras to teams with <5
+    const normalize = () => {
+      const over = teams.flatMap((t, i) => t.length > 5 ? t.slice(5).map(x => ({ i, x })) : []);
+      for (const t of teams) t.splice(5);
+      for (const { x } of over) {
+        const target = teams.find(t => t.length < 5);
+        if (target) target.push(x);
+      }
+      while (teams.some(t => t.length < 5)) {
+        // shouldn't happen with 15 attendees, but guard
+        const donor = teams.find(t => t.length > 5);
+        const receiver = teams.find(t => t.length < 5);
+        if (!donor || !receiver) break;
+        receiver.push(donor.pop());
+      }
+    };
+    normalize();
+
     // write team_members
-    for (const mid of teamA) {
-      await client.query('INSERT INTO team_members (team_id, member_id) VALUES ($1,$2)', [teamAId, mid]);
-    }
-    for (const mid of teamB) {
-      await client.query('INSERT INTO team_members (team_id, member_id) VALUES ($1,$2)', [teamBId, mid]);
-    }
+    for (const mid of teamA) await client.query('INSERT INTO team_members (team_id, member_id) VALUES ($1,$2)', [teamAId, mid]);
+    for (const mid of teamB) await client.query('INSERT INTO team_members (team_id, member_id) VALUES ($1,$2)', [teamBId, mid]);
+    for (const mid of teamC) await client.query('INSERT INTO team_members (team_id, member_id) VALUES ($1,$2)', [teamCId, mid]);
 
     // compute avg height
     const avg = (arr) => (arr.length ? Math.round(arr.reduce((s, id) => s + (heightMap.get(id) || 0), 0) / arr.length) : 0);
     await client.query('UPDATE teams SET average_height = $1 WHERE id = $2', [avg(teamA), teamAId]);
     await client.query('UPDATE teams SET average_height = $1 WHERE id = $2', [avg(teamB), teamBId]);
+    await client.query('UPDATE teams SET average_height = $1 WHERE id = $2', [avg(teamC), teamCId]);
 
-    // matches: 1~3 games per event
-    const matchCount = randInt(1, 3);
-    for (let m = 0; m < matchCount; m++) {
+    // matches: 기본 3경기(각 팀 조합 1번씩)
+    const pairs = [
+      [teamAId, teamBId],
+      [teamAId, teamCId],
+      [teamBId, teamCId],
+    ];
+
+    for (const [t1, t2] of pairs) {
       const matchId = crypto.randomUUID();
       const result = pick(['Team1Win', 'Team2Win', 'Draw']);
       await client.query(
         'INSERT INTO matches (id, history_id, team1_id, team2_id, result) VALUES ($1,$2,$3,$4,$5)',
-        [matchId, historyId, teamAId, teamBId, result]
+        [matchId, historyId, t1, t2, result]
       );
     }
   }
