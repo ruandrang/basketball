@@ -1,5 +1,6 @@
 import { query, queryOne, execute, withTransaction } from './db';
 import { Club, Member, HistoryRecord, Team, Match } from './types';
+import { AttendanceState } from './attendance';
 
 export async function getClubs(): Promise<Club[]> {
     try {
@@ -189,6 +190,26 @@ export async function saveHistory(clubId: string, record: HistoryRecord): Promis
 
 export async function deleteHistory(historyId: string): Promise<void> {
     await execute('DELETE FROM history_records WHERE id = $1', [historyId]);
+}
+
+// Attendance
+export async function setAttendance(historyId: string, memberId: string, state: AttendanceState): Promise<void> {
+    await execute(
+        `INSERT INTO attendance_members (history_id, member_id, state)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (history_id, member_id) DO UPDATE SET state = $3, updated_at = NOW()`,
+        [historyId, memberId, state]
+    );
+}
+
+export async function getAttendanceMap(historyId: string): Promise<Record<string, AttendanceState>> {
+    const rows = await query<{ member_id: string; state: AttendanceState }>(
+        'SELECT member_id, state FROM attendance_members WHERE history_id = $1',
+        [historyId]
+    );
+    const map: Record<string, AttendanceState> = {};
+    for (const r of rows) map[r.member_id] = r.state;
+    return map;
 }
 
 export async function updateHistoryDate(historyId: string, dateIso: string): Promise<void> {
