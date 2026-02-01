@@ -25,14 +25,20 @@ interface TeamGeneratorProps {
     clubId: string;
     allMembers: Member[];
     history: HistoryRecord[];
+    initialSelectedIds?: string[];
+    initialTeamCount?: 2 | 3;
 }
 
 const TEAM_COLORS: TeamColor[] = ['White', 'Black', 'Red', 'Blue', 'Yellow', 'Green'];
 
-export default function TeamGenerator({ clubId, allMembers, history }: TeamGeneratorProps) {
+export default function TeamGenerator({ clubId, allMembers, history, initialSelectedIds, initialTeamCount }: TeamGeneratorProps) {
     const router = useRouter();
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-    const [teamColors, setTeamColors] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(
+        new Set(initialSelectedIds ?? [])
+    );
+    const [teamCount, setTeamCount] = useState<2 | 3>(initialTeamCount ?? 2);
+    const [teamColors2, setTeamColors2] = useState<[TeamColor, TeamColor]>(['White', 'Black']);
+    const [teamColors3, setTeamColors3] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -47,7 +53,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
         return allMembers.filter(m => selectedIds.has(m.id));
     }, [allMembers, selectedIds]);
 
-    const MAX_SELECTED = 18;
+    const MAX_SELECTED = 30;
 
     const toggleSelection = (id: string) => {
         setSelectedIds(prev => {
@@ -77,11 +83,21 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
     const selectedCount = selectedIds.size;
 
     const handleGenerate = () => {
-        if (selectedCount < 3) {
-            alert('최소 3명의 플레이어를 선택해주세요.');
+        if (selectedCount < 2) {
+            alert('최소 2명의 플레이어를 선택해주세요.');
             return;
         }
-        const teams = generateTeams(totalSelectedMembers, teamColors, history);
+
+        const colors = teamCount === 2 ? teamColors2 : teamColors3;
+
+        // 룰 안내(센터 배치)
+        const centers = totalSelectedMembers.filter(m => m.position === 'C').length;
+        if (centers < teamCount) {
+            const ok = confirm(`센터(C)가 팀 수(${teamCount})보다 적습니다.\n\n센터 1명씩 배치 규칙을 만족하기 어려울 수 있어요.\n그래도 생성할까요?`);
+            if (!ok) return;
+        }
+
+        const teams = generateTeams(totalSelectedMembers, [...colors], history, teamCount);
         setGeneratedTeams(teams);
     };
 
@@ -256,44 +272,113 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                 </div>
             </div>
 
-            {/* Color Selection */}
+            {/* Team Count + Color Selection */}
             <div className="card" style={{ marginBottom: '2rem' }}>
-                <h3 style={{ marginBottom: '1rem' }}>팀 색상 선택</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                    {[0, 1, 2].map(idx => (
-                        <div key={idx}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>
-                                팀 {idx + 1}
-                            </label>
-                            <select
-                                value={teamColors[idx]}
-                                onChange={(e) => {
-                                    const newColors: [TeamColor, TeamColor, TeamColor] = [...teamColors] as [TeamColor, TeamColor, TeamColor];
-                                    newColors[idx] = e.target.value as TeamColor;
-                                    setTeamColors(newColors);
-                                }}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.75rem',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--color-border)',
-                                    background: 'var(--color-bg-primary)',
-                                    color: 'white'
-                                }}
-                            >
-                                {TEAM_COLORS.map(color => (
-                                    <option key={color} value={color}>{color}</option>
-                                ))}
-                            </select>
-                            <div style={{
-                                marginTop: '0.5rem',
-                                height: '30px',
-                                backgroundColor: getColorHex(teamColors[idx]),
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
+                    <div>
+                        <h3 style={{ marginBottom: '0.25rem' }}>팀 설정</h3>
+                        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                            기본은 5:5(2팀) 기준. 인원에 따라 팀당 인원은 자동 분배돼요.
+                        </p>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>팀 수</label>
+                        <select
+                            value={teamCount}
+                            onChange={(e) => setTeamCount(Number(e.target.value) as 2 | 3)}
+                            style={{
+                                padding: '0.75rem',
                                 borderRadius: 'var(--radius-sm)',
-                                border: '2px solid var(--color-border)'
-                            }}></div>
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-bg-primary)',
+                                color: 'white'
+                            }}
+                        >
+                            <option value={2}>2팀 (기본)</option>
+                            <option value={3}>3팀</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '1rem' }}>
+                    <h3 style={{ marginBottom: '1rem' }}>팀 색상 선택</h3>
+
+                    {teamCount === 2 ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                            {[0, 1].map(idx => (
+                                <div key={idx}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>
+                                        팀 {idx + 1}
+                                    </label>
+                                    <select
+                                        value={teamColors2[idx]}
+                                        onChange={(e) => {
+                                            const newColors: [TeamColor, TeamColor] = [...teamColors2] as [TeamColor, TeamColor];
+                                            newColors[idx] = e.target.value as TeamColor;
+                                            setTeamColors2(newColors);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            borderRadius: 'var(--radius-sm)',
+                                            border: '1px solid var(--color-border)',
+                                            background: 'var(--color-bg-primary)',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        {/* 2팀일 때 기본은 White/Black, 선택은 전체 6색 허용 */}
+                                        {TEAM_COLORS.map(color => (
+                                            <option key={color} value={color}>{color}</option>
+                                        ))}
+                                    </select>
+                                    <div style={{
+                                        marginTop: '0.5rem',
+                                        height: '30px',
+                                        backgroundColor: getColorHex(teamColors2[idx]),
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '2px solid var(--color-border)'
+                                    }} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                            {[0, 1, 2].map(idx => (
+                                <div key={idx}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>
+                                        팀 {idx + 1}
+                                    </label>
+                                    <select
+                                        value={teamColors3[idx]}
+                                        onChange={(e) => {
+                                            const newColors: [TeamColor, TeamColor, TeamColor] = [...teamColors3] as [TeamColor, TeamColor, TeamColor];
+                                            newColors[idx] = e.target.value as TeamColor;
+                                            setTeamColors3(newColors);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            borderRadius: 'var(--radius-sm)',
+                                            border: '1px solid var(--color-border)',
+                                            background: 'var(--color-bg-primary)',
+                                            color: 'white'
+                                        }}
+                                    >
+                                        {TEAM_COLORS.map(color => (
+                                            <option key={color} value={color}>{color}</option>
+                                        ))}
+                                    </select>
+                                    <div style={{
+                                        marginTop: '0.5rem',
+                                        height: '30px',
+                                        backgroundColor: getColorHex(teamColors3[idx]),
+                                        borderRadius: 'var(--radius-sm)',
+                                        border: '2px solid var(--color-border)'
+                                    }} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
