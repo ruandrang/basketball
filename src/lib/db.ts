@@ -2,17 +2,56 @@ import { Pool, PoolClient } from 'pg';
 
 let pool: Pool | null = null;
 
+function shouldUseSsl(connectionString: string): boolean {
+    // Supabase (direct or pooler) requires SSL in most cases.
+    // Local dev URLs typically should NOT use SSL.
+    const cs = connectionString.toLowerCase();
+
+    // Explicit override
+    if (process.env.PGSSL === 'false' || process.env.PGSSLMODE === 'disable') return false;
+    if (process.env.PGSSL === 'true' || process.env.PGSSLMODE === 'require') return true;
+
+    // If URL explicitly requires/disabled SSL
+    if (cs.includes('sslmode=require')) return true;
+    if (cs.includes('sslmode=disable')) return false;
+
+    // Heuristic: Supabase hosts should use SSL; localhost should not.
+    const isLocal = cs.includes('localhost') || cs.includes('127.0.0.1') || cs.includes('0.0.0.0');
+    const looksSupabase = cs.includes('.supabase.co') || cs.includes('.supabase.com');
+
+    if (looksSupabase) return true;
+    if (isLocal) return false;
+
+    // Default: safe for most managed Postgres providers
+    return true;
+}
+
 function getPool(): Pool {
     if (!pool) {
         const connectionString = process.env.DATABASE_URL;
         if (!connectionString) {
             throw new Error('Missing DATABASE_URL environment variable');
         }
+
+        const useSsl = shouldUseSsl(connectionString);
+
+        // IMPORTANT: node-postgres parses sslmode from the connection string and may set
+        // rejectUnauthorized=true. We manage SSL via the explicit `ssl` option instead,
+        // so we strip sslmode from the URL to avoid conflicts.
+        let normalizedConnectionString = connectionString;
+        try {
+            const u = new URL(connectionString);
+            u.searchParams.delete('sslmode');
+            normalizedConnectionString = u.toString();
+        } catch {
+            // ignore; keep as-is
+        }
+
         // NOTE: On Vercel/serverless, keep pool size small to avoid exhausting
         // Supabase Postgres connections. Prefer using Supabase's pooled (PgBouncer) URL.
         pool = new Pool({
-            connectionString,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+            connectionString: normalizedConnectionString,
+            ssl: useSsl ? { rejectUnauthorized: false } : false,
             max: Number(process.env.PGPOOL_MAX ?? 1),
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 10000,

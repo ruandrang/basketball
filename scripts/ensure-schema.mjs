@@ -15,9 +15,26 @@ async function main() {
   const sqlPath = path.join(process.cwd(), 'scripts', 'init-db.sql');
   const sql = await fs.readFile(sqlPath, 'utf8');
 
+  const cs = connectionString.toLowerCase();
+  const useSsl =
+    process.env.PGSSL === 'true' ||
+    process.env.PGSSLMODE === 'require' ||
+    cs.includes('sslmode=require') ||
+    cs.includes('.supabase.co') ||
+    cs.includes('.supabase.com');
+
+  let normalizedConnectionString = connectionString;
+  try {
+    const u = new URL(connectionString);
+    u.searchParams.delete('sslmode');
+    normalizedConnectionString = u.toString();
+  } catch {
+    // ignore
+  }
+
   const pool = new Pool({
-    connectionString,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    connectionString: normalizedConnectionString,
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
     max: 2,
     idleTimeoutMillis: 10_000,
     connectionTimeoutMillis: 10_000,

@@ -7,7 +7,27 @@ async function main() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error('Missing DATABASE_URL');
 
-  const pool = new Pool({ connectionString, ssl: false });
+  const cs = connectionString.toLowerCase();
+  const useSsl =
+    process.env.PGSSL === 'true' ||
+    process.env.PGSSLMODE === 'require' ||
+    cs.includes('sslmode=require') ||
+    cs.includes('.supabase.co') ||
+    cs.includes('.supabase.com');
+
+  let normalizedConnectionString = connectionString;
+  try {
+    const u = new URL(connectionString);
+    u.searchParams.delete('sslmode');
+    normalizedConnectionString = u.toString();
+  } catch {
+    // ignore
+  }
+
+  const pool = new Pool({
+    connectionString: normalizedConnectionString,
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
+  });
 
   const id = crypto.randomUUID();
   const name = `Smoke Club ${new Date().toISOString()}`;

@@ -60,7 +60,27 @@ function makeMemberName(i) {
 }
 
 async function main() {
-  const client = new Client({ connectionString: DATABASE_URL });
+  const cs = DATABASE_URL.toLowerCase();
+  const useSsl =
+    process.env.PGSSL === 'true' ||
+    process.env.PGSSLMODE === 'require' ||
+    cs.includes('sslmode=require') ||
+    cs.includes('.supabase.co') ||
+    cs.includes('.supabase.com');
+
+  let normalizedConnectionString = DATABASE_URL;
+  try {
+    const u = new URL(DATABASE_URL);
+    u.searchParams.delete('sslmode');
+    normalizedConnectionString = u.toString();
+  } catch {
+    // ignore
+  }
+
+  const client = new Client({
+    connectionString: normalizedConnectionString,
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
+  });
   await client.connect();
 
   console.log('[seed] connected');
