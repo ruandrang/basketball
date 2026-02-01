@@ -198,6 +198,13 @@ export async function updateHistoryDate(historyId: string, dateIso: string): Pro
     );
 }
 
+export async function addClub(club: Club): Promise<void> {
+    await execute(
+        'INSERT INTO clubs (id, name) VALUES ($1, $2)',
+        [club.id, club.name]
+    );
+}
+
 export async function deleteClub(clubId: string): Promise<void> {
     await execute('DELETE FROM clubs WHERE id = $1', [clubId]);
 }
