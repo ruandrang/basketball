@@ -41,6 +41,10 @@ CREATE TABLE IF NOT EXISTS members (
 
 -- ensure new columns exist even on existing installs
 ALTER TABLE clubs ADD COLUMN IF NOT EXISTS owner_id UUID REFERENCES users(id) ON DELETE CASCADE;
+
+-- Set existing clubs without owner to admin
+UPDATE clubs SET owner_id = '00000000-0000-0000-0000-000000000000' WHERE owner_id IS NULL;
+
 ALTER TABLE members ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE members ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 

@@ -16,7 +16,7 @@ export default async function Home() {
   // Admin sees all clubs, regular users see only their clubs
   const clubs = currentUser.isAdmin
     ? allClubs
-    : allClubs.filter(club => club.ownerId === currentUser.id);
+    : allClubs.filter(club => club.ownerId && club.ownerId === currentUser.id);
 
   return (
     <main className="container" style={{ padding: '2rem 0' }}>
