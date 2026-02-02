@@ -15,10 +15,10 @@ INSERT INTO users (id, username, password_hash, display_name)
 VALUES (
     '00000000-0000-0000-0000-000000000000',
     'admin',
-    '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '$2b$10$SmZ9mWfh7zhqDZetGeuv3ebyiFqjRvOKdQwCUWywO2z5MQugnMQUi',
     '관리자'
 )
-ON CONFLICT (username) DO NOTHING;
+ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 CREATE TABLE IF NOT EXISTS clubs (
     id UUID PRIMARY KEY,
