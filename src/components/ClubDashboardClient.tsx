@@ -3,15 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateClubName, deleteClub } from '@/app/actions/club';
+import { HistoryRecord } from '@/lib/types';
+import HistoryList from '@/components/HistoryList';
 
 interface ClubDashboardClientProps {
     clubId: string;
     clubName: string;
     memberCount: number;
-    historyCount: number;
+    history: HistoryRecord[];
 }
 
-export default function ClubDashboardClient({ clubId, clubName, memberCount, historyCount }: ClubDashboardClientProps) {
+export default function ClubDashboardClient({ clubId, clubName, memberCount, history }: ClubDashboardClientProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState(clubName);
@@ -132,7 +134,7 @@ export default function ClubDashboardClient({ clubId, clubName, memberCount, his
                         </div>
                     )}
                     <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-                        멤버 {memberCount}명 • 기록 {historyCount}건
+                        멤버 {memberCount}명 • 기록 {history.length}건
                     </p>
                 </div>
             </div>
@@ -147,13 +149,23 @@ export default function ClubDashboardClient({ clubId, clubName, memberCount, his
                     <a href={`/clubs/${clubId}/members`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         멤버 관리 (Members)
                     </a>
-                    <a href={`/clubs/${clubId}/history`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-                        기록 보기 (History)
-                    </a>
                     <a href={`/clubs/${clubId}/stats`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
                         통계 (Statistics)
                     </a>
                 </div>
+            </div>
+
+            <div className="card" style={{ marginTop: '1.5rem' }}>
+                <h2>이전 기록</h2>
+                {history.length === 0 ? (
+                    <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '2rem 0' }}>
+                        기록이 없습니다. 팀을 생성해 보세요.
+                    </p>
+                ) : (
+                    <div style={{ marginTop: '1rem' }}>
+                        <HistoryList history={history} clubId={clubId} clubName={clubName} />
+                    </div>
+                )}
             </div>
         </main>
     );

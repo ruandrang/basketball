@@ -27,7 +27,7 @@ export default async function ClubDashboard({ params }: PageProps) {
             clubId={club.id}
             clubName={club.name}
             memberCount={club.members.length}
-            historyCount={club.history.length}
+            history={club.history}
         />
     );
 }
