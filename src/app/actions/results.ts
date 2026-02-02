@@ -1,10 +1,24 @@
 'use server'
 
-import { replaceMatchResults } from '@/lib/cached-storage';
+import { replaceMatchResults, getClubCached as getClub } from '@/lib/cached-storage';
 import { Match } from '@/lib/types';
 import { revalidatePath, updateTag } from 'next/cache';
+import { getCurrentUser } from '@/lib/auth';
+
+async function checkAccess(clubId: string) {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error('Unauthorized');
+
+    const club = await getClub(clubId);
+    if (!club) throw new Error('클럽을 찾을 수 없습니다.');
+
+    if (!currentUser.isAdmin && club.ownerId !== currentUser.id) {
+        throw new Error('권한이 없습니다.');
+    }
+}
 
 export async function updateMatchResult(clubId: string, recordId: string, matches: Match[]) {
+    await checkAccess(clubId);
     try {
         await replaceMatchResults(recordId, matches);
 

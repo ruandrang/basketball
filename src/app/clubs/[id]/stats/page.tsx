@@ -1,5 +1,6 @@
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { checkClubAccess } from '@/lib/auth';
 import StatsDisplay from '@/components/StatsDisplay';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,11 @@ export default async function ClubStatsPage({ params }: PageProps) {
 
     if (!club) {
         notFound();
+    }
+
+    const hasAccess = await checkClubAccess(club.ownerId);
+    if (!hasAccess) {
+        redirect('/');
     }
 
     return (

@@ -3,8 +3,23 @@
 import { revalidatePath, updateTag } from 'next/cache';
 import { execute } from '@/lib/db';
 import { Position } from '@/lib/types';
+import { getClubCached as getClub } from '@/lib/cached-storage';
+import { getCurrentUser } from '@/lib/auth';
+
+async function checkAccess(clubId: string) {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error('Unauthorized');
+
+    const club = await getClub(clubId);
+    if (!club) throw new Error('클럽을 찾을 수 없습니다.');
+
+    if (!currentUser.isAdmin && club.ownerId !== currentUser.id) {
+        throw new Error('권한이 없습니다.');
+    }
+}
 
 export async function importMembers(clubId: string, csvData: string) {
+    await checkAccess(clubId);
     const lines = csvData.trim().split('\n');
     // Expected headers: name,age,height,position,number
 

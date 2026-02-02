@@ -34,6 +34,8 @@ export const getClubsCached = async (): Promise<Club[]> => {
 
 // Re-export non-cached mutating functions to keep imports simple in server actions.
 export const {
+  getUserByUsername,
+  createUser,
   addClub,
   updateClub,
   deleteClub,

@@ -1,9 +1,34 @@
 import { query, queryOne, execute, withTransaction } from './db';
-import { Club, Member, HistoryRecord, Team, Match } from './types';
+import { Club, Member, HistoryRecord, Team, Match, User } from './types';
+
+// ===== User functions =====
+
+export async function getUserByUsername(username: string): Promise<(User & { passwordHash: string }) | undefined> {
+    const row = await queryOne<{ id: string; username: string; password_hash: string; display_name: string }>(
+        'SELECT id, username, password_hash, display_name FROM users WHERE username = $1',
+        [username]
+    );
+    if (!row) return undefined;
+    return {
+        id: row.id,
+        username: row.username,
+        displayName: row.display_name,
+        passwordHash: row.password_hash,
+    };
+}
+
+export async function createUser(id: string, username: string, passwordHash: string, displayName: string): Promise<void> {
+    await execute(
+        'INSERT INTO users (id, username, password_hash, display_name) VALUES ($1, $2, $3, $4)',
+        [id, username, passwordHash, displayName]
+    );
+}
+
+// ===== Club functions =====
 
 export async function getClubs(): Promise<Club[]> {
     try {
-        const clubs = await query<{ id: string; name: string }>(
+        const clubs = await query<{ id: string; name: string; owner_id: string | null }>(
             'SELECT * FROM clubs ORDER BY created_at DESC'
         );
         if (clubs.length === 0) return [];
@@ -22,6 +47,7 @@ export async function getClubs(): Promise<Club[]> {
         return clubs.map(club => ({
             id: club.id,
             name: club.name,
+            ownerId: club.owner_id || undefined,
             members: (membersByClub.get(club.id) || []).map(transformMember),
             history: [],
         }));
@@ -33,7 +59,7 @@ export async function getClubs(): Promise<Club[]> {
 
 export async function getClub(id: string): Promise<Club | undefined> {
     try {
-        const club = await queryOne<{ id: string; name: string }>(
+        const club = await queryOne<{ id: string; name: string; owner_id: string | null }>(
             'SELECT * FROM clubs WHERE id = $1',
             [id]
         );
@@ -125,6 +151,7 @@ export async function getClub(id: string): Promise<Club | undefined> {
         return {
             id: club.id,
             name: club.name,
+            ownerId: club.owner_id || undefined,
             members: members.map(transformMember),
             history,
         };
@@ -256,8 +283,8 @@ export async function updateHistoryDate(historyId: string, dateIso: string): Pro
 
 export async function addClub(club: Club): Promise<void> {
     await execute(
-        'INSERT INTO clubs (id, name) VALUES ($1, $2)',
-        [club.id, club.name]
+        'INSERT INTO clubs (id, name, owner_id) VALUES ($1, $2, $3)',
+        [club.id, club.name, club.ownerId || null]
     );
 }
 

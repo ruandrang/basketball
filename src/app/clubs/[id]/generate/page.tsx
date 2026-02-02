@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { checkClubAccess } from '@/lib/auth';
 import TeamGenerator from '@/components/TeamGenerator';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,11 @@ export default async function ClubGeneratePage({ params }: PageProps) {
 
     if (!club) {
         notFound();
+    }
+
+    const hasAccess = await checkClubAccess(club.ownerId);
+    if (!hasAccess) {
+        redirect('/');
     }
 
     return (

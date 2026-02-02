@@ -1,5 +1,6 @@
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { checkClubAccess } from '@/lib/auth';
 import MemberManagement from '@/components/MemberManagement';
 import CsvTools from '@/components/CsvTools';
 import HistoryJsonTools from '@/components/HistoryJsonTools';
@@ -16,6 +17,11 @@ export default async function ClubMembersPage({ params }: PageProps) {
 
     if (!club) {
         notFound();
+    }
+
+    const hasAccess = await checkClubAccess(club.ownerId);
+    if (!hasAccess) {
+        redirect('/');
     }
 
     return (

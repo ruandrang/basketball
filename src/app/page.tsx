@@ -1,21 +1,52 @@
 import { getClubsCached as getClubs } from '@/lib/cached-storage';
 import { createClub } from '@/app/actions/club';
+import { getCurrentUser } from '@/lib/auth';
+import { logout } from '@/app/actions/auth';
 import CreateClubForm from '@/components/CreateClubForm';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const clubs = await getClubs();
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    throw new Error('Unauthorized');
+  }
+
+  const allClubs = await getClubs();
+  // Admin sees all clubs, regular users see only their clubs
+  const clubs = currentUser.isAdmin
+    ? allClubs
+    : allClubs.filter(club => club.ownerId === currentUser.id);
 
   return (
     <main className="container" style={{ padding: '2rem 0' }}>
       <div style={{ marginBottom: '2.5rem' }}>
-        <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-          농구 동호회 팀관리 프로그램 ver 0.2 Beta
-        </h1>
-        <p style={{ color: 'var(--color-accent-gold)', fontSize: '1.1rem', fontWeight: '500' }}>
-          아직은 베타 테스트중이니 마음껏 사용해 보세요
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div>
+            <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+              농구 동호회 팀관리 프로그램 ver 0.2 Beta
+            </h1>
+            <p style={{ color: 'var(--color-accent-gold)', fontSize: '1.1rem', fontWeight: '500' }}>
+              아직은 베타 테스트중이니 마음껏 사용해 보세요
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ color: 'var(--color-text-primary)', fontWeight: '500' }}>
+                {currentUser.displayName}
+                {currentUser.isAdmin && ' (관리자)'}
+              </div>
+              <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                @{currentUser.username}
+              </div>
+            </div>
+            <form action={logout}>
+              <button type="submit" className="btn btn-secondary">
+                로그아웃
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: '2rem' }}>

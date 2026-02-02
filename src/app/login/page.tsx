@@ -13,7 +13,7 @@ export default async function LoginPage({
       <div className="card" style={{ maxWidth: 420, margin: '0 auto' }}>
         <h1 style={{ marginBottom: '0.5rem' }}>로그인</h1>
         <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-          개발용 임시 로그인 (admin / admin)
+          Basketball Club Manager에 로그인하세요
         </p>
 
         {error && (
@@ -34,7 +34,6 @@ export default async function LoginPage({
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>아이디</label>
             <input
               name="id"
-              defaultValue="admin"
               autoComplete="username"
               required
               style={{
@@ -53,7 +52,6 @@ export default async function LoginPage({
             <input
               name="pw"
               type="password"
-              defaultValue="admin"
               autoComplete="current-password"
               required
               style={{
@@ -69,6 +67,13 @@ export default async function LoginPage({
 
           <button type="submit" className="btn btn-primary">로그인</button>
         </form>
+
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+          계정이 없으신가요?{' '}
+          <a href="/signup" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
+            회원가입
+          </a>
+        </div>
       </div>
     </main>
   );

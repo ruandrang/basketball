@@ -1,8 +1,29 @@
 -- Basketball Club Manager Database Schema
 
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Insert admin user (password: admin)
+-- bcrypt hash for 'admin' with cost factor 10
+INSERT INTO users (id, username, password_hash, display_name)
+VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'admin',
+    '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '관리자'
+)
+ON CONFLICT (username) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS clubs (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -19,6 +40,7 @@ CREATE TABLE IF NOT EXISTS members (
 );
 
 -- ensure new columns exist even on existing installs
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS owner_id UUID REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE members ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE members ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 

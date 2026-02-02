@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const COOKIE_NAME = 'bb_auth';
+const COOKIE_NAME = 'bb_user';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -15,20 +15,36 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // allow login route
-  if (pathname === '/login') {
+  // allow login and signup routes
+  if (pathname === '/login' || pathname === '/signup') {
     // already authed -> go home
-    if (req.cookies.get(COOKIE_NAME)?.value === '1') {
-      const url = req.nextUrl.clone();
-      url.pathname = '/';
-      url.search = '';
-      return NextResponse.redirect(url);
+    const userCookie = req.cookies.get(COOKIE_NAME)?.value;
+    if (userCookie) {
+      try {
+        JSON.parse(userCookie);
+        const url = req.nextUrl.clone();
+        url.pathname = '/';
+        url.search = '';
+        return NextResponse.redirect(url);
+      } catch {
+        // invalid cookie, allow access
+      }
     }
     return NextResponse.next();
   }
 
   // Everything else requires auth
-  const authed = req.cookies.get(COOKIE_NAME)?.value === '1';
+  const userCookie = req.cookies.get(COOKIE_NAME)?.value;
+  let authed = false;
+  if (userCookie) {
+    try {
+      JSON.parse(userCookie);
+      authed = true;
+    } catch {
+      // invalid cookie
+    }
+  }
+
   if (!authed) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';

@@ -1,6 +1,12 @@
 export type Position = 'PG' | 'SG' | 'SF' | 'PF' | 'C';
 export type TeamColor = 'White' | 'Black' | 'Red' | 'Blue' | 'Yellow' | 'Green';
 
+export interface User {
+    id: string;
+    username: string;
+    displayName: string;
+}
+
 export interface Member {
     id: string;
     name: string;
@@ -36,6 +42,7 @@ export interface HistoryRecord {
 export interface Club {
     id: string;
     name: string;
+    ownerId?: string;
     members: Member[];
     history: HistoryRecord[];
 }
