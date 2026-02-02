@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { getClub } from '@/lib/storage';
+import { getClubCached as getClub } from '@/lib/cached-storage';
 
 export const runtime = 'nodejs';
 

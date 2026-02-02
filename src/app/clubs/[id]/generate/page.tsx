@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getClub } from '@/lib/storage';
+import { getClubCached as getClub } from '@/lib/cached-storage';
 import { notFound } from 'next/navigation';
 import TeamGenerator from '@/components/TeamGenerator';
 

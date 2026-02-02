@@ -1,4 +1,4 @@
-import { getClub } from '@/lib/storage';
+import { getClubCached as getClub } from '@/lib/cached-storage';
 import { notFound } from 'next/navigation';
 import ClubDashboardClient from '@/components/ClubDashboardClient';
 

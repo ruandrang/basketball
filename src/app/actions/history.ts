@@ -1,8 +1,8 @@
 'use server'
 
-import { saveHistory, deleteHistory as dbDeleteHistory, updateHistoryDate as dbUpdateHistoryDate } from '@/lib/storage';
+import { saveHistory, deleteHistory as dbDeleteHistory, updateHistoryDate as dbUpdateHistoryDate } from '@/lib/cached-storage';
 import { Team, HistoryRecord } from '@/lib/types';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function saveTeamHistory(clubId: string, teams: Team[]) {
     const recordId = crypto.randomUUID();
@@ -22,12 +22,14 @@ export async function saveTeamHistory(clubId: string, teams: Team[]) {
     };
 
     await saveHistory(clubId, newRecord);
+    revalidateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/history`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
 
 export async function deleteHistory(clubId: string, historyId: string) {
     await dbDeleteHistory(historyId);
+    revalidateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/history`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
@@ -37,6 +39,7 @@ export async function updateHistoryDate(clubId: string, historyId: string, ymd: 
     // Store as timestamp with explicit +09:00 offset to avoid timezone drift
     const iso = `${ymd}T00:00:00+09:00`;
     await dbUpdateHistoryDate(historyId, iso);
+    revalidateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/history`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }

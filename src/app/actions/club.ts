@@ -1,7 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache';
-import { getClub, addClub, updateClub, deleteClub as dbDeleteClub } from '@/lib/storage';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { getClubCached as getClub, addClub, updateClub, deleteClub as dbDeleteClub } from '@/lib/cached-storage';
 
 export async function createClub(formData: FormData) {
     const name = formData.get('name') as string;
@@ -17,6 +17,7 @@ export async function createClub(formData: FormData) {
     };
 
     await addClub(newClub);
+    revalidateTag('clubs:list');
     revalidatePath('/');
 }
 
@@ -26,12 +27,16 @@ export async function updateClubName(clubId: string, newName: string) {
 
     club.name = newName;
     await updateClub(club);
+    revalidateTag(`club:${clubId}`);
+    revalidateTag('clubs:list');
     revalidatePath(`/clubs/${clubId}/dashboard`);
     revalidatePath('/');
 }
 
 export async function deleteClub(clubId: string) {
     await dbDeleteClub(clubId);
+    revalidateTag(`club:${clubId}`);
+    revalidateTag('clubs:list');
     revalidatePath('/');
     return { success: true };
 }

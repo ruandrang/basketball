@@ -1,4 +1,4 @@
-import { getClub } from '@/lib/storage';
+import { getClubCached as getClub } from '@/lib/cached-storage';
 import { notFound } from 'next/navigation';
 import MemberManagement from '@/components/MemberManagement';
 import CsvTools from '@/components/CsvTools';

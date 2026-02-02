@@ -1,4 +1,4 @@
-import { getClubs } from '@/lib/storage';
+import { getClubsCached as getClubs } from '@/lib/cached-storage';
 import { createClub } from '@/app/actions/club';
 import CreateClubForm from '@/components/CreateClubForm';
 
