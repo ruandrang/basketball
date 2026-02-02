@@ -1,7 +1,7 @@
 'use client';
 
 import { Member, HistoryRecord } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 interface PlayerStats {
     memberId: string;
@@ -18,7 +18,24 @@ interface StatsDisplayProps {
     history: HistoryRecord[];
 }
 
+type SortField = 'name' | 'gamesPlayed' | 'wins' | 'losses' | 'draws' | 'winRate';
+type SortDirection = 'asc' | 'desc';
+
 export default function StatsDisplay({ members, history }: StatsDisplayProps) {
+    const [sortField, setSortField] = useState<SortField>('gamesPlayed');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            // Toggle direction if clicking the same field
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Set new field with default descending direction
+            setSortField(field);
+            setSortDirection('desc');
+        }
+    };
+
     const playerStats = useMemo(() => {
         const stats: Record<string, PlayerStats> = {};
 
@@ -82,8 +99,26 @@ export default function StatsDisplay({ members, history }: StatsDisplayProps) {
             }
         });
 
-        return Object.values(stats).sort((a, b) => b.gamesPlayed - a.gamesPlayed || b.winRate - a.winRate);
+        return Object.values(stats);
     }, [members, history]);
+
+    const sortedPlayerStats = useMemo(() => {
+        const sorted = [...playerStats].sort((a, b) => {
+            let comparison = 0;
+
+            if (sortField === 'name') {
+                // Korean alphabetical order
+                comparison = a.name.localeCompare(b.name, 'ko');
+            } else {
+                // Numeric comparison
+                comparison = a[sortField] - b[sortField];
+            }
+
+            return sortDirection === 'asc' ? comparison : -comparison;
+        });
+
+        return sorted;
+    }, [playerStats, sortField, sortDirection]);
 
     const teamMatchHistory = useMemo(() => {
         const matches: Array<{
@@ -148,16 +183,94 @@ export default function StatsDisplay({ members, history }: StatsDisplayProps) {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
-                                <th style={{ padding: '0.75rem', textAlign: 'left', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>선수명</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>경기수</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>승</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>패</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>무</th>
-                                <th style={{ padding: '0.75rem', textAlign: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>승률</th>
+                                <th
+                                    onClick={() => handleSort('name')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'left',
+                                        color: sortField === 'name' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    선수명 {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    onClick={() => handleSort('gamesPlayed')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'center',
+                                        color: sortField === 'gamesPlayed' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    경기수 {sortField === 'gamesPlayed' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    onClick={() => handleSort('wins')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'center',
+                                        color: sortField === 'wins' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    승 {sortField === 'wins' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    onClick={() => handleSort('losses')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'center',
+                                        color: sortField === 'losses' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    패 {sortField === 'losses' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    onClick={() => handleSort('draws')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'center',
+                                        color: sortField === 'draws' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    무 {sortField === 'draws' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th
+                                    onClick={() => handleSort('winRate')}
+                                    style={{
+                                        padding: '0.75rem',
+                                        textAlign: 'center',
+                                        color: sortField === 'winRate' ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                                        fontSize: '0.85rem',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    승률 {sortField === 'winRate' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {playerStats.map((stat, idx) => (
+                            {sortedPlayerStats.map((stat) => (
                                 <tr key={stat.memberId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                     <td style={{ padding: '0.75rem', fontWeight: 500 }}>{stat.name}</td>
                                     <td style={{ padding: '0.75rem', textAlign: 'center' }}>{stat.gamesPlayed}</td>
