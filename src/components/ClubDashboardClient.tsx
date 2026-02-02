@@ -3,44 +3,37 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { updateClubName, deleteClub } from '@/app/actions/club';
+import Image from 'next/image';
+import { deleteClub, updateClubDetails } from '@/app/actions/club';
 import { HistoryRecord } from '@/lib/types';
 import HistoryList from '@/components/HistoryList';
 import styles from './ClubDashboardClient.module.css';
+import ClubIconPicker from '@/components/ClubIconPicker';
+import { useFormStatus } from 'react-dom';
 
 interface ClubDashboardClientProps {
     clubId: string;
     clubName: string;
+    clubIcon?: string;
     memberCount: number;
     history: HistoryRecord[];
 }
 
-export default function ClubDashboardClient({ clubId, clubName, memberCount, history }: ClubDashboardClientProps) {
+function SaveButton() {
+    const { pending } = useFormStatus();
+    return (
+        <button className="btn btn-primary btn-sm" type="submit" disabled={pending}>
+            {pending ? '저장 중...' : '저장'}
+        </button>
+    );
+}
+
+export default function ClubDashboardClient({ clubId, clubName, clubIcon, memberCount, history }: ClubDashboardClientProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
-    const [editedName, setEditedName] = useState(clubName);
-    const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleSave = async () => {
-        if (!editedName.trim()) {
-            alert('클럽 이름을 입력해주세요.');
-            return;
-        }
-        setIsSaving(true);
-        try {
-            await updateClubName(clubId, editedName);
-            setIsEditing(false);
-        } catch (e) {
-            console.error(e);
-            alert('저장 실패했습니다.');
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
     const handleCancel = () => {
-        setEditedName(clubName);
         setIsEditing(false);
     };
 
@@ -74,26 +67,40 @@ export default function ClubDashboardClient({ clubId, clubName, memberCount, his
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     {isEditing ? (
-                        <div className={styles.editForm}>
-                            <input
-                                className={`input ${styles.editInput}`}
-                                value={editedName}
-                                onChange={(e) => setEditedName(e.target.value)}
-                                autoFocus
-                            />
-                            <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={isSaving}>
-                                {isSaving ? '저장 중...' : '저장'}
-                            </button>
-                            <button className="btn btn-secondary btn-sm" onClick={handleCancel} disabled={isSaving}>
-                                취소
-                            </button>
-                        </div>
+                        <form action={updateClubDetails} className={styles.editForm}>
+                            <input type="hidden" name="clubId" value={clubId} />
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}>
+                                <input
+                                    className={`input ${styles.editInput}`}
+                                    name="name"
+                                    defaultValue={clubName}
+                                    autoFocus
+                                />
+
+                                <ClubIconPicker name="icon" defaultValue={clubIcon} />
+
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <SaveButton />
+                                    <button className="btn btn-secondary btn-sm" type="button" onClick={handleCancel}>
+                                        취소
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     ) : (
                         <>
-                            <h1 className={styles.title}>{clubName}</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                {clubIcon ? (
+                                    <Image src={`/club-icons/${clubIcon}`} alt="club icon" width={44} height={44} />
+                                ) : (
+                                    <div style={{ fontSize: '2rem' }}>🏀</div>
+                                )}
+                                <h1 className={styles.title} style={{ margin: 0 }}>{clubName}</h1>
+                            </div>
                             <div className={styles.headerActions}>
                                 <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
-                                    이름 수정
+                                    수정
                                 </button>
                                 <button
                                     className="btn btn-danger btn-sm"

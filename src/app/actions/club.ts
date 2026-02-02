@@ -15,10 +15,13 @@ export async function createClub(formData: FormData) {
         throw new Error('클럽 이름을 입력해주세요.');
     }
 
+    const icon = (formData.get('icon') as string | null) ?? undefined;
+
     const newClub = {
         id: crypto.randomUUID(),
         name: name.trim(),
         ownerId: currentUser.id,
+        icon: icon?.trim() || undefined,
         members: [],
         history: []
     };
@@ -28,11 +31,18 @@ export async function createClub(formData: FormData) {
     revalidatePath('/');
 }
 
-export async function updateClubName(clubId: string, newName: string) {
+export async function updateClubDetails(formData: FormData) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
         throw new Error('Unauthorized');
     }
+
+    const clubId = formData.get('clubId') as string;
+    const name = formData.get('name') as string;
+    const icon = (formData.get('icon') as string | null) ?? undefined;
+
+    if (!clubId) throw new Error('clubId is required');
+    if (!name?.trim()) throw new Error('클럽 이름을 입력해주세요.');
 
     const club = await getClub(clubId);
     if (!club) throw new Error('클럽을 찾을 수 없습니다.');
@@ -42,7 +52,9 @@ export async function updateClubName(clubId: string, newName: string) {
         throw new Error('권한이 없습니다.');
     }
 
-    club.name = newName;
+    club.name = name.trim();
+    club.icon = icon?.trim() || undefined;
+
     await updateClub(club);
     updateTag(`club:${clubId}`);
     updateTag('clubs:list');

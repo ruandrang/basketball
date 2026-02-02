@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/sync-club-icons.mjs && node scripts/ensure-schema.mjs && next dev",
+    "build": "node scripts/sync-club-icons.mjs && next build",
     "start": "node scripts/ensure-schema.mjs && next start -p $PORT",
     "seed:demo": "node scripts/seed-demo.mjs",
     "lint": "eslint"

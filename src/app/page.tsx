@@ -70,7 +70,14 @@ export default async function Home() {
             <div className={styles.clubGrid}>
               {clubs.map(club => (
                 <Link key={club.id} href={`/clubs/${club.id}/dashboard`} className={styles.clubCard}>
-                  <div className={styles.clubIcon}>🏀</div>
+                  <div className={styles.clubIcon}>
+                    {club.icon ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/club-icons/${club.icon}`} alt="club icon" width={40} height={40} />
+                    ) : (
+                      '🏀'
+                    )}
+                  </div>
                   <div className={styles.clubInfo}>
                     <h3 className={styles.clubName}>{club.name}</h3>
                     <p className={styles.clubMeta}>

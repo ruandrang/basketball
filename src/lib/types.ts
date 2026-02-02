@@ -43,6 +43,8 @@ export interface Club {
     id: string;
     name: string;
     ownerId?: string;
+    /** filename under /public/club-icons (e.g. "basketball-icon-01.png") */
+    icon?: string;
     members: Member[];
     history: HistoryRecord[];
 }

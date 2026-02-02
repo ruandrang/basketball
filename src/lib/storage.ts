@@ -28,7 +28,7 @@ export async function createUser(id: string, username: string, passwordHash: str
 
 export async function getClubs(): Promise<Club[]> {
     try {
-        const clubs = await query<{ id: string; name: string; owner_id: string | null }>(
+        const clubs = await query<{ id: string; name: string; owner_id: string | null; icon: string | null }>(
             'SELECT * FROM clubs ORDER BY created_at DESC'
         );
         if (clubs.length === 0) return [];
@@ -59,6 +59,7 @@ export async function getClubs(): Promise<Club[]> {
             id: club.id,
             name: club.name,
             ownerId: club.owner_id || undefined,
+            icon: club.icon || undefined,
             members: (membersByClub.get(club.id) || []).map(transformMember),
             history: (historyByClub.get(club.id) || []).map(hr => ({
                 id: hr.id,
@@ -74,7 +75,7 @@ export async function getClubs(): Promise<Club[]> {
 
 export async function getClub(id: string): Promise<Club | undefined> {
     try {
-        const club = await queryOne<{ id: string; name: string; owner_id: string | null }>(
+        const club = await queryOne<{ id: string; name: string; owner_id: string | null; icon: string | null }>(
             'SELECT * FROM clubs WHERE id = $1',
             [id]
         );
@@ -167,6 +168,7 @@ export async function getClub(id: string): Promise<Club | undefined> {
             id: club.id,
             name: club.name,
             ownerId: club.owner_id || undefined,
+            icon: club.icon || undefined,
             members: members.map(transformMember),
             history,
         };
@@ -191,9 +193,9 @@ function transformMember(m: any): Member {
 
 export async function updateClub(updatedClub: Club): Promise<void> {
     await execute(
-        `INSERT INTO clubs (id, name) VALUES ($1, $2)
-         ON CONFLICT (id) DO UPDATE SET name = $2`,
-        [updatedClub.id, updatedClub.name]
+        `INSERT INTO clubs (id, name, icon) VALUES ($1, $2, $3)
+         ON CONFLICT (id) DO UPDATE SET name = $2, icon = $3`,
+        [updatedClub.id, updatedClub.name, updatedClub.icon || null]
     );
 
     if (updatedClub.members.length > 0) {
@@ -299,8 +301,8 @@ export async function updateHistoryDate(historyId: string, dateIso: string): Pro
 
 export async function addClub(club: Club): Promise<void> {
     await execute(
-        'INSERT INTO clubs (id, name, owner_id) VALUES ($1, $2, $3)',
-        [club.id, club.name, club.ownerId || null]
+        'INSERT INTO clubs (id, name, owner_id, icon) VALUES ($1, $2, $3, $4)',
+        [club.id, club.name, club.ownerId || null, club.icon || null]
     );
 }
 

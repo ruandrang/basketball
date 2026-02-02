@@ -20,6 +20,7 @@ export default async function ClubDashboard({ params }: PageProps) {
         <ClubDashboardClient
             clubId={club.id}
             clubName={club.name}
+            clubIcon={club.icon}
             memberCount={club.members.length}
             history={club.history}
         />
