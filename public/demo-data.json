@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "exportedAt": "2026-02-03T12:00:00+09:00",
+  "club": {
+    "name": "데모 클럽"
+  },
+  "members": [
+    { "name": "김태양", "age": 25, "height": 188, "position": "SF", "number": 1 },
+    { "name": "이준혁", "age": 28, "height": 193, "position": "C", "number": 2 },
+    { "name": "박민수", "age": 24, "height": 178, "position": "PG", "number": 3 },
+    { "name": "최윤호", "age": 26, "height": 185, "position": "SG", "number": 4 },
+    { "name": "정대희", "age": 27, "height": 191, "position": "PF", "number": 5 },
+    { "name": "강현우", "age": 23, "height": 176, "position": "PG", "number": 6 },
+    { "name": "윤성민", "age": 29, "height": 195, "position": "C", "number": 7 },
+    { "name": "임재현", "age": 25, "height": 183, "position": "SG", "number": 8 },
+    { "name": "한동진", "age": 24, "height": 189, "position": "SF", "number": 9 },
+    { "name": "오승환", "age": 26, "height": 192, "position": "PF", "number": 10 },
+    { "name": "서지훈", "age": 27, "height": 179, "position": "PG", "number": 11 },
+    { "name": "남궁민", "age": 25, "height": 187, "position": "SF", "number": 12 },
+    { "name": "배준영", "age": 28, "height": 194, "position": "C", "number": 13 },
+    { "name": "황인성", "age": 23, "height": 181, "position": "SG", "number": 14 },
+    { "name": "안태준", "age": 26, "height": 190, "position": "PF", "number": 15 },
+    { "name": "노승호", "age": 24, "height": 177, "position": "PG", "number": 16 },
+    { "name": "차민재", "age": 29, "height": 196, "position": "C", "number": 17 },
+    { "name": "홍성준", "age": 25, "height": 184, "position": "SG", "number": 18 },
+    { "name": "유재석", "age": 27, "height": 188, "position": "SF", "number": 19 },
+    { "name": "문상훈", "age": 26, "height": 191, "position": "PF", "number": 20 },
+    { "name": "신동엽", "age": 28, "height": 180, "position": "PG", "number": 21 },
+    { "name": "조세호", "age": 24, "height": 186, "position": "SF", "number": 22 },
+    { "name": "양세찬", "age": 25, "height": 193, "position": "C", "number": 23 },
+    { "name": "하하", "age": 27, "height": 182, "position": "SG", "number": 24 },
+    { "name": "송지효", "age": 26, "height": 189, "position": "PF", "number": 25 },
+    { "name": "김종국", "age": 29, "height": 178, "position": "PG", "number": 26 },
+    { "name": "지석진", "age": 25, "height": 185, "position": "SG", "number": 27 },
+    { "name": "전소민", "age": 23, "height": 190, "position": "SF", "number": 28 },
+    { "name": "양세형", "age": 28, "height": 195, "position": "C", "number": 29 },
+    { "name": "이광수", "age": 24, "height": 183, "position": "SG", "number": 30 },
+    { "name": "김주혁", "age": 26, "height": 187, "position": "SF", "number": 31 },
+    { "name": "박성호", "age": 27, "height": 192, "position": "PF", "number": 32 },
+    { "name": "정형돈", "age": 25, "height": 179, "position": "PG", "number": 33 },
+    { "name": "박명수", "age": 29, "height": 188, "position": "SF", "number": 34 },
+    { "name": "노홍철", "age": 26, "height": 194, "position": "C", "number": 35 },
+    { "name": "정준하", "age": 24, "height": 181, "position": "SG", "number": 36 },
+    { "name": "길성준", "age": 28, "height": 189, "position": "PF", "number": 37 },
+    { "name": "곽튜브", "age": 23, "height": 177, "position": "PG", "number": 38 },
+    { "name": "침착맨", "age": 27, "height": 186, "position": "SG", "number": 39 },
+    { "name": "주호민", "age": 25, "height": 191, "position": "SF", "number": 40 }
+  ],
+  "history": [
+    {
+      "date": "2026-01-01T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "White", "members": [{"name": "김태양", "number": 1, "position": "SF"}, {"name": "최윤호", "number": 4, "position": "SG"}, {"name": "한동진", "number": 9, "position": "SF"}, {"name": "배준영", "number": 13, "position": "C"}, {"name": "노승호", "number": 16, "position": "PG"}, {"name": "홍성준", "number": 18, "position": "SG"}]},
+        {"name": "Team B", "color": "Black", "members": [{"name": "이준혁", "number": 2, "position": "C"}, {"name": "강현우", "number": 6, "position": "PG"}, {"name": "오승환", "number": 10, "position": "PF"}, {"name": "황인성", "number": 14, "position": "SG"}, {"name": "차민재", "number": 17, "position": "C"}, {"name": "신동엽", "number": 21, "position": "PG"}]},
+        {"name": "Team C", "color": "Red", "members": [{"name": "박민수", "number": 3, "position": "PG"}, {"name": "윤성민", "number": 7, "position": "C"}, {"name": "서지훈", "number": 11, "position": "PG"}, {"name": "안태준", "number": 15, "position": "PF"}, {"name": "문상훈", "number": 20, "position": "PF"}, {"name": "양세찬", "number": 23, "position": "C"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team1Win"},
+        {"team1Name": "Team A", "team2Name": "Team C", "result": "Team2Win"},
+        {"team1Name": "Team B", "team2Name": "Team C", "result": "Team1Win"}
+      ]
+    },
+    {
+      "date": "2026-01-02T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Blue", "members": [{"name": "정대희", "number": 5, "position": "PF"}, {"name": "임재현", "number": 8, "position": "SG"}, {"name": "남궁민", "number": 12, "position": "SF"}, {"name": "차민재", "number": 17, "position": "C"}, {"name": "신동엽", "number": 21, "position": "PG"}, {"name": "하하", "number": 24, "position": "SG"}]},
+        {"name": "Team B", "color": "Yellow", "members": [{"name": "양세찬", "number": 23, "position": "C"}, {"name": "송지효", "number": 25, "position": "PF"}, {"name": "지석진", "number": 27, "position": "SG"}, {"name": "양세형", "number": 29, "position": "C"}, {"name": "김주혁", "number": 31, "position": "SF"}, {"name": "정형돈", "number": 33, "position": "PG"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team2Win"}
+      ]
+    },
+    {
+      "date": "2026-01-03T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Green", "members": [{"name": "김종국", "number": 26, "position": "PG"}, {"name": "전소민", "number": 28, "position": "SF"}, {"name": "이광수", "number": 30, "position": "SG"}, {"name": "박성호", "number": 32, "position": "PF"}, {"name": "박명수", "number": 34, "position": "SF"}, {"name": "길성준", "number": 37, "position": "PF"}]},
+        {"name": "Team B", "color": "White", "members": [{"name": "노홍철", "number": 35, "position": "C"}, {"name": "곽튜브", "number": 38, "position": "PG"}, {"name": "침착맨", "number": 39, "position": "SG"}, {"name": "주호민", "number": 40, "position": "SF"}, {"name": "김태양", "number": 1, "position": "SF"}, {"name": "박민수", "number": 3, "position": "PG"}]},
+        {"name": "Team C", "color": "Black", "members": [{"name": "이준혁", "number": 2, "position": "C"}, {"name": "정대희", "number": 5, "position": "PF"}, {"name": "임재현", "number": 8, "position": "SG"}, {"name": "서지훈", "number": 11, "position": "PG"}, {"name": "황인성", "number": 14, "position": "SG"}, {"name": "차민재", "number": 17, "position": "C"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Draw"},
+        {"team1Name": "Team A", "team2Name": "Team C", "result": "Team1Win"},
+        {"team1Name": "Team B", "team2Name": "Team C", "result": "Team2Win"}
+      ]
+    },
+    {
+      "date": "2026-01-04T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Red", "members": [{"name": "최윤호", "number": 4, "position": "SG"}, {"name": "윤성민", "number": 7, "position": "C"}, {"name": "오승환", "number": 10, "position": "PF"}, {"name": "배준영", "number": 13, "position": "C"}, {"name": "안태준", "number": 15, "position": "PF"}, {"name": "홍성준", "number": 18, "position": "SG"}]},
+        {"name": "Team B", "color": "Blue", "members": [{"name": "강현우", "number": 6, "position": "PG"}, {"name": "한동진", "number": 9, "position": "SF"}, {"name": "남궁민", "number": 12, "position": "SF"}, {"name": "황인성", "number": 14, "position": "SG"}, {"name": "차민재", "number": 17, "position": "C"}, {"name": "문상훈", "number": 20, "position": "PF"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team1Win"}
+      ]
+    },
+    {
+      "date": "2026-01-05T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Yellow", "members": [{"name": "유재석", "number": 19, "position": "SF"}, {"name": "신동엽", "number": 21, "position": "PG"}, {"name": "양세찬", "number": 23, "position": "C"}, {"name": "송지효", "number": 25, "position": "PF"}, {"name": "지석진", "number": 27, "position": "SG"}, {"name": "양세형", "number": 29, "position": "C"}]},
+        {"name": "Team B", "color": "Green", "members": [{"name": "조세호", "number": 22, "position": "SF"}, {"name": "하하", "number": 24, "position": "SG"}, {"name": "김종국", "number": 26, "position": "PG"}, {"name": "전소민", "number": 28, "position": "SF"}, {"name": "이광수", "number": 30, "position": "SG"}, {"name": "박성호", "number": 32, "position": "PF"}]},
+        {"name": "Team C", "color": "White", "members": [{"name": "김주혁", "number": 31, "position": "SF"}, {"name": "정형돈", "number": 33, "position": "PG"}, {"name": "노홍철", "number": 35, "position": "C"}, {"name": "곽튜브", "number": 38, "position": "PG"}, {"name": "침착맨", "number": 39, "position": "SG"}, {"name": "이준혁", "number": 2, "position": "C"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team2Win"},
+        {"team1Name": "Team A", "team2Name": "Team C", "result": "Team1Win"},
+        {"team1Name": "Team B", "team2Name": "Team C", "result": "Team2Win"}
+      ]
+    },
+    {
+      "date": "2026-01-06T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Black", "members": [{"name": "박명수", "number": 34, "position": "SF"}, {"name": "길성준", "number": 37, "position": "PF"}, {"name": "주호민", "number": 40, "position": "SF"}, {"name": "김태양", "number": 1, "position": "SF"}, {"name": "최윤호", "number": 4, "position": "SG"}, {"name": "윤성민", "number": 7, "position": "C"}]},
+        {"name": "Team B", "color": "Red", "members": [{"name": "박민수", "number": 3, "position": "PG"}, {"name": "정대희", "number": 5, "position": "PF"}, {"name": "임재현", "number": 8, "position": "SG"}, {"name": "한동진", "number": 9, "position": "SF"}, {"name": "서지훈", "number": 11, "position": "PG"}, {"name": "황인성", "number": 14, "position": "SG"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Draw"}
+      ]
+    },
+    {
+      "date": "2026-01-07T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Blue", "members": [{"name": "강현우", "number": 6, "position": "PG"}, {"name": "오승환", "number": 10, "position": "PF"}, {"name": "남궁민", "number": 12, "position": "SF"}, {"name": "배준영", "number": 13, "position": "C"}, {"name": "안태준", "number": 15, "position": "PF"}, {"name": "차민재", "number": 17, "position": "C"}]},
+        {"name": "Team B", "color": "Yellow", "members": [{"name": "노승호", "number": 16, "position": "PG"}, {"name": "홍성준", "number": 18, "position": "SG"}, {"name": "유재석", "number": 19, "position": "SF"}, {"name": "신동엽", "number": 21, "position": "PG"}, {"name": "양세찬", "number": 23, "position": "C"}, {"name": "송지효", "number": 25, "position": "PF"}]},
+        {"name": "Team C", "color": "Green", "members": [{"name": "문상훈", "number": 20, "position": "PF"}, {"name": "조세호", "number": 22, "position": "SF"}, {"name": "하하", "number": 24, "position": "SG"}, {"name": "김종국", "number": 26, "position": "PG"}, {"name": "전소민", "number": 28, "position": "SF"}, {"name": "양세형", "number": 29, "position": "C"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team1Win"},
+        {"team1Name": "Team A", "team2Name": "Team C", "result": "Team2Win"},
+        {"team1Name": "Team B", "team2Name": "Team C", "result": "Team1Win"}
+      ]
+    },
+    {
+      "date": "2026-01-08T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "White", "members": [{"name": "지석진", "number": 27, "position": "SG"}, {"name": "이광수", "number": 30, "position": "SG"}, {"name": "김주혁", "number": 31, "position": "SF"}, {"name": "정형돈", "number": 33, "position": "PG"}, {"name": "노홍철", "number": 35, "position": "C"}, {"name": "곽튜브", "number": 38, "position": "PG"}]},
+        {"name": "Team B", "color": "Black", "members": [{"name": "박성호", "number": 32, "position": "PF"}, {"name": "박명수", "number": 34, "position": "SF"}, {"name": "정준하", "number": 36, "position": "SG"}, {"name": "길성준", "number": 37, "position": "PF"}, {"name": "침착맨", "number": 39, "position": "SG"}, {"name": "주호민", "number": 40, "position": "SF"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team2Win"}
+      ]
+    },
+    {
+      "date": "2026-01-09T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Red", "members": [{"name": "김태양", "number": 1, "position": "SF"}, {"name": "박민수", "number": 3, "position": "PG"}, {"name": "정대희", "number": 5, "position": "PF"}, {"name": "윤성민", "number": 7, "position": "C"}, {"name": "한동진", "number": 9, "position": "SF"}, {"name": "서지훈", "number": 11, "position": "PG"}]},
+        {"name": "Team B", "color": "Blue", "members": [{"name": "이준혁", "number": 2, "position": "C"}, {"name": "최윤호", "number": 4, "position": "SG"}, {"name": "강현우", "number": 6, "position": "PG"}, {"name": "임재현", "number": 8, "position": "SG"}, {"name": "오승환", "number": 10, "position": "PF"}, {"name": "남궁민", "number": 12, "position": "SF"}]},
+        {"name": "Team C", "color": "Yellow", "members": [{"name": "배준영", "number": 13, "position": "C"}, {"name": "황인성", "number": 14, "position": "SG"}, {"name": "노승호", "number": 16, "position": "PG"}, {"name": "홍성준", "number": 18, "position": "SG"}, {"name": "문상훈", "number": 20, "position": "PF"}, {"name": "조세호", "number": 22, "position": "SF"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Team1Win"},
+        {"team1Name": "Team A", "team2Name": "Team C", "result": "Team1Win"},
+        {"team1Name": "Team B", "team2Name": "Team C", "result": "Team2Win"}
+      ]
+    },
+    {
+      "date": "2026-01-10T19:00:00+09:00",
+      "teams": [
+        {"name": "Team A", "color": "Green", "members": [{"name": "안태준", "number": 15, "position": "PF"}, {"name": "차민재", "number": 17, "position": "C"}, {"name": "유재석", "number": 19, "position": "SF"}, {"name": "신동엽", "number": 21, "position": "PG"}, {"name": "양세찬", "number": 23, "position": "C"}, {"name": "송지효", "number": 25, "position": "PF"}]},
+        {"name": "Team B", "color": "White", "members": [{"name": "하하", "number": 24, "position": "SG"}, {"name": "김종국", "number": 26, "position": "PG"}, {"name": "전소민", "number": 28, "position": "SF"}, {"name": "이광수", "number": 30, "position": "SG"}, {"name": "박성호", "number": 32, "position": "PF"}, {"name": "박명수", "number": 34, "position": "SF"}]}
+      ],
+      "matches": [
+        {"team1Name": "Team A", "team2Name": "Team B", "result": "Draw"}
+      ]
+    }
+  ]
+}

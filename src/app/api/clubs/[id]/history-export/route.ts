@@ -6,7 +6,8 @@ export const runtime = 'nodejs';
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const jar = await cookies();
-  if (jar.get('bb_auth')?.value !== '1') {
+  const userCookie = jar.get('bb_user')?.value;
+  if (!userCookie) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
