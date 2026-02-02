@@ -29,7 +29,7 @@ type ImportRecord = {
 type ImportPayloadV1 = {
   version: 1;
   exportedAt: string;
-  club: { id?: string; name?: string };
+  club?: { id?: string; name?: string };
   members?: Array<{ name: string; number: number; position?: Position; height?: number; age?: number }>;
   history: ImportRecord[];
 };
@@ -89,6 +89,23 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return Number(row.rows?.[0]?.next ?? 1);
   });
   let nextSortOrder = nextSortOrderStart;
+
+  // If payload has members array, create them first before processing history
+  if (payload.members && payload.members.length > 0) {
+    await withTransaction(async (client) => {
+      for (const m of payload.members!) {
+        const key = sig({ name: m.name, number: m.number });
+        if (!existingMembers.has(key)) {
+          const memberId = crypto.randomUUID();
+          await client.query(
+            'INSERT INTO members (id, club_id, name, age, height, position, number, sort_order) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+            [memberId, clubId, m.name, m.age ?? 0, m.height ?? 0, m.position ?? 'SF', m.number, nextSortOrder++]
+          );
+          existingMembers.set(key, memberId);
+        }
+      }
+    });
+  }
 
   const resolveMemberId = async (client: any, m: ImportMember): Promise<{ memberId: string; createdGuest: boolean }> => {
     const key = sig(m);

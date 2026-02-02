@@ -20,7 +20,6 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const payload = {
     version: 1,
     exportedAt: new Date().toISOString(),
-    club: { id: club.id, name: club.name },
     members: club.members.map((m) => ({
       name: m.name,
       number: m.number,
@@ -47,7 +46,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     })),
   };
 
-  const filename = `club-${club.id}-history.json`;
+  const timestamp = new Date().toISOString().split('T')[0];
+  const filename = `basketball-data-${timestamp}.json`;
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
     status: 200,

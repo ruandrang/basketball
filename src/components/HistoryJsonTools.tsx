@@ -35,9 +35,9 @@ export default function HistoryJsonTools({ clubId }: { clubId: string }) {
     <div className="card" style={{ marginBottom: '1rem' }}>
       <h3 style={{ marginBottom: '0.5rem' }}>경기 기록 가져오기/내보내기 (JSON)</h3>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
-        - Export: 이 클럽의 기록(팀/경기)을 JSON 1개 파일로 다운로드
+        - Export: 이 클럽의 멤버와 기록(팀/경기)을 JSON 파일로 다운로드
         <br />
-        - Import: JSON 1개 파일 업로드로 기록을 추가(기존 DB 유지)
+        - Import: JSON 파일을 업로드하여 다른 클럽에서도 사용 가능 (멤버 정보 포함)
         <br />
         - 데모 데이터: 40명의 멤버와 10개의 경기 기록이 포함된 샘플 데이터
       </p>
@@ -67,7 +67,7 @@ export default function HistoryJsonTools({ clubId }: { clubId: string }) {
       )}
 
       <div style={{ marginTop: '0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
-        * Import 시 DB에 없는 멤버는 Guest1, Guest2…로 자동 생성됩니다.
+        * Import 시 JSON에 포함된 멤버 정보를 자동으로 생성합니다. 어느 클럽에서든 사용 가능합니다.
       </div>
     </div>
   );
