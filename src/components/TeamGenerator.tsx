@@ -402,13 +402,17 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                             cursor: 'pointer',
                             borderColor: selectedIds.has(member.id) ? 'var(--color-accent-primary)' : 'var(--color-border)',
                             backgroundColor: selectedIds.has(member.id) ? 'rgba(255, 107, 0, 0.1)' : 'var(--color-bg-card)',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem'
                         }}
                     >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div>
-                                <div style={{ fontWeight: 'bold' }}>{member.name}</div>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{member.position}</div>
+                        {/* 상단: 이름 #등번호 + 선택 체크박스 */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
+                            <div style={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {member.name}{' '}
+                                <span style={{ fontSize: '0.8em', color: 'var(--color-text-secondary)' }}>#{member.number}</span>
                             </div>
                             <div style={{
                                 width: '24px', height: '24px',
@@ -416,10 +420,17 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                                 border: '2px solid',
                                 borderColor: selectedIds.has(member.id) ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
                                 backgroundColor: selectedIds.has(member.id) ? 'var(--color-accent-primary)' : 'transparent',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0
                             }}>
                                 {selectedIds.has(member.id) && <span style={{ color: 'white', fontSize: '14px' }}>✓</span>}
                             </div>
+                        </div>
+                        {/* 하단: 키, 포지션 */}
+                        <div style={{ display: 'flex', gap: '0.75rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                            <span>{member.height}cm</span>
+                            <span>•</span>
+                            <span>{member.position}</span>
                         </div>
                     </div>
                 ))}
