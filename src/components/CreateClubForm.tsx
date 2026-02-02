@@ -27,14 +27,8 @@ export default function CreateClubForm({ action }: { action: (formData: FormData
         name="name"
         placeholder="클럽 이름 입력"
         required
-        style={{
-          padding: '0.5rem',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--color-border)',
-          background: 'var(--color-bg-primary)',
-          color: 'white',
-          width: '100%'
-        }}
+        className="input"
+        style={{ width: '100%' }}
       />
       <SubmitButton />
     </form>

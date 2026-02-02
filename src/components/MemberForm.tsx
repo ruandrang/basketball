@@ -31,81 +31,82 @@ export default function MemberForm({ clubId, initialData, onClose }: MemberFormP
     }
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 100
-        }}>
-            <div className="card" style={{ width: '100%', maxWidth: '500px' }}>
-                <h2 style={{ marginBottom: '1.5rem' }}>{initialData ? '멤버 수정' : '새 멤버 등록'}</h2>
+        <div className="modal-overlay">
+            <div className="modal" style={{ maxWidth: '500px' }}>
+                <div className="modal-header">
+                    <h2 className="modal-title">{initialData ? '멤버 수정' : '새 멤버 등록'}</h2>
+                    <button className="modal-close" onClick={onClose}>&times;</button>
+                </div>
 
-                <form action={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>이름</label>
-                        <input
-                            name="name"
-                            defaultValue={initialData?.name}
-                            required
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
-                        />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>나이</label>
+                <form action={handleSubmit}>
+                    <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div className="form-group">
+                            <label className="form-label">이름</label>
                             <input
-                                name="age"
-                                type="number"
-                                defaultValue={initialData?.age}
+                                name="name"
+                                defaultValue={initialData?.name}
                                 required
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
+                                className="input"
                             />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>등번호</label>
-                            <input
-                                name="number"
-                                type="number"
-                                defaultValue={initialData?.number}
-                                required
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
-                            />
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="form-group">
+                                <label className="form-label">나이</label>
+                                <input
+                                    name="age"
+                                    type="number"
+                                    defaultValue={initialData?.age}
+                                    required
+                                    className="input"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">등번호</label>
+                                <input
+                                    name="number"
+                                    type="number"
+                                    defaultValue={initialData?.number}
+                                    required
+                                    className="input"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="form-group">
+                                <label className="form-label">키 (cm)</label>
+                                <input
+                                    name="height"
+                                    type="number"
+                                    defaultValue={initialData?.height}
+                                    required
+                                    className="input"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">포지션</label>
+                                <select
+                                    name="position"
+                                    defaultValue={initialData?.position || 'SF'}
+                                    className="select"
+                                >
+                                    <option value="PG">포인트 가드 (PG)</option>
+                                    <option value="SG">슈팅 가드 (SG)</option>
+                                    <option value="SF">스몰 포워드 (SF)</option>
+                                    <option value="PF">파워 포워드 (PF)</option>
+                                    <option value="C">센터 (C)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>키 (cm)</label>
-                            <input
-                                name="height"
-                                type="number"
-                                defaultValue={initialData?.height}
-                                required
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>포지션</label>
-                            <select
-                                name="position"
-                                defaultValue={initialData?.position || 'SF'}
-                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', background: 'var(--color-bg-primary)', color: 'white' }}
-                            >
-                                <option value="PG">포인트 가드 (PG)</option>
-                                <option value="SG">슈팅 가드 (SG)</option>
-                                <option value="SF">스몰 포워드 (SF)</option>
-                                <option value="PF">파워 포워드 (PF)</option>
-                                <option value="C">센터 (C)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                        <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSubmitting}>
-                            {initialData ? '수정' : '등록'}
-                        </button>
+                    <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
                             취소
+                        </button>
+                        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                            {isSubmitting ? '저장 중...' : (initialData ? '수정' : '등록')}
                         </button>
                     </div>
                 </form>

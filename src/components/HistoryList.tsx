@@ -195,13 +195,8 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                     type="date"
                                                     value={dateDraft}
                                                     onChange={(e) => setDateDraft(e.target.value)}
-                                                    style={{
-                                                        padding: '0.5rem',
-                                                        borderRadius: 'var(--radius-sm)',
-                                                        border: '1px solid var(--color-border)',
-                                                        background: 'var(--color-bg-primary)',
-                                                        color: 'white'
-                                                    }}
+                                                    className="input"
+                                                    style={{ width: 'auto' }}
                                                 />
                                                 <button
                                                     className="btn btn-primary"
@@ -273,7 +268,7 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                 const team2 = record.teams.find(t => t.id === match.team2Id)!;
 
                                                 return (
-                                                    <div key={match.id} style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-sm)' }}>
+                                                    <div key={match.id} style={{ padding: '1rem', background: 'var(--gray-100)', borderRadius: 'var(--radius-sm)' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
                                                                 <span style={{ width: '16px', height: '16px', backgroundColor: getColorHex(team1.color), borderRadius: '3px' }}></span>
@@ -308,15 +303,7 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                         <select
                                                             value={matchResults[match.id] || 'Draw'}
                                                             onChange={(e) => setMatchResults({ ...matchResults, [match.id]: e.target.value as any })}
-                                                            style={{
-                                                                width: '100%',
-                                                                padding: '0.5rem',
-                                                                borderRadius: 'var(--radius-sm)',
-                                                                border: '1px solid var(--color-border)',
-                                                                background: 'var(--color-bg-primary)',
-                                                                color: 'white',
-                                                                fontSize: '0.95rem'
-                                                            }}
+                                                            className="select"
                                                         >
                                                             <option value="Team1Win">{team1.name} 승리</option>
                                                             <option value="Draw">무승부</option>
@@ -333,14 +320,8 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                     <select
                                                         value={newMatchPair}
                                                         onChange={(e) => setNewMatchPair(e.target.value)}
-                                                        style={{
-                                                            padding: '0.5rem',
-                                                            borderRadius: 'var(--radius-sm)',
-                                                            border: '1px solid var(--color-border)',
-                                                            background: 'var(--color-bg-primary)',
-                                                            color: 'white',
-                                                            fontSize: '0.9rem'
-                                                        }}
+                                                        className="select"
+                                                        style={{ width: 'auto' }}
                                                     >
                                                         {[
                                                             [record.teams[0], record.teams[1]],
@@ -424,7 +405,7 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                         const stats = teamStats[team.id];
 
                                         return (
-                                            <div key={team.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '2px solid ' + getColorHex(team.color) }}>
+                                            <div key={team.id} style={{ background: 'var(--gray-50)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '2px solid ' + getColorHex(team.color) }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                         <span style={{ width: '20px', height: '20px', backgroundColor: getColorHex(team.color), borderRadius: '4px' }}></span>

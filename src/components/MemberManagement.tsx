@@ -153,13 +153,8 @@ export default function MemberManagement({ clubId, members, history }: MemberMan
                         <select
                             value={sortMode}
                             onChange={(e) => setSortMode(e.target.value as any)}
-                            style={{
-                                padding: '0.6rem 0.75rem',
-                                borderRadius: 'var(--radius-sm)',
-                                border: '1px solid var(--color-border)',
-                                background: 'var(--color-bg-primary)',
-                                color: 'white',
-                            }}
+                            className="select"
+                            style={{ width: 'auto' }}
                         >
                             <option value="custom">사용자 지정(드래그)</option>
                             <option value="positionAsc">포지션별 (PG→C)</option>

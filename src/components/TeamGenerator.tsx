@@ -255,7 +255,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                 <div>
                     <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>플레이어 선택</h1>
                     <p style={{ color: 'var(--color-text-secondary)' }}>
-                        선택됨: <strong style={{ color: selectedCount === 18 ? 'var(--color-success)' : 'white' }}>{selectedCount}</strong> / 18
+                        선택됨: <strong style={{ color: selectedCount === 18 ? 'var(--color-success)' : 'var(--gray-900)' }}>{selectedCount}</strong> / 18
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -282,13 +282,8 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                         <select
                             value={teamCount}
                             onChange={(e) => setTeamCount(Number(e.target.value) as 2 | 3)}
-                            style={{
-                                padding: '0.75rem',
-                                borderRadius: 'var(--radius-sm)',
-                                border: '1px solid var(--color-border)',
-                                background: 'var(--color-bg-primary)',
-                                color: 'white'
-                            }}
+                            className="select"
+                            style={{ width: 'auto' }}
                         >
                             <option value={3}>3팀 (기본)</option>
                             <option value={2}>2팀</option>
@@ -313,14 +308,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                                             newColors[idx] = e.target.value as TeamColor;
                                             setTeamColors2(newColors);
                                         }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.75rem',
-                                            borderRadius: 'var(--radius-sm)',
-                                            border: '1px solid var(--color-border)',
-                                            background: 'var(--color-bg-primary)',
-                                            color: 'white'
-                                        }}
+                                        className="select"
                                     >
                                         {/* 2팀일 때 기본은 White/Black, 선택은 전체 6색 허용 */}
                                         {TEAM_COLORS.map(color => (
@@ -351,14 +339,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                                             newColors[idx] = e.target.value as TeamColor;
                                             setTeamColors3(newColors);
                                         }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '0.75rem',
-                                            borderRadius: 'var(--radius-sm)',
-                                            border: '1px solid var(--color-border)',
-                                            background: 'var(--color-bg-primary)',
-                                            color: 'white'
-                                        }}
+                                        className="select"
                                     >
                                         {TEAM_COLORS.map(color => (
                                             <option key={color} value={color}>{color}</option>
