@@ -38,17 +38,11 @@ export default function HistoryJsonTools({ clubId }: { clubId: string }) {
         - Export: 이 클럽의 멤버와 기록(팀/경기)을 JSON 파일로 다운로드
         <br />
         - Import: JSON 파일을 업로드하여 다른 클럽에서도 사용 가능 (멤버 정보 포함)
-        <br />
-        - 데모 데이터: 40명의 멤버와 10개의 경기 기록이 포함된 샘플 데이터
       </p>
 
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <a className="btn btn-secondary" href={exportUrl}>
           기록 Export (JSON)
-        </a>
-
-        <a className="btn btn-secondary" href="/demo-data.json" download="demo-data.json">
-          데모 데이터 다운로드
         </a>
 
         <input
