@@ -5,6 +5,8 @@ import { generateTeams } from '@/lib/generator';
 import { saveTeamHistory } from '@/app/actions/history';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { POSITIONS, Position } from '@/lib/positions';
+import { computeWinStatsForMembers, computeParticipationForMembers } from '@/lib/member-stats';
 import {
     closestCenter,
     DndContext,
@@ -37,7 +39,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
     const [teamColors3, setTeamColors3] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [sortBy, setSortBy] = useState<'default' | 'name' | 'position' | 'height' | 'number' | 'age'>('default');
+    const [sortBy, setSortBy] = useState<'default' | 'positionAsc' | 'positionDesc' | 'winRateDesc' | 'winRateAsc' | 'participationDesc' | 'participationAsc'>('default');
 
     // dnd-kit (works on mobile)
     const sensors = useSensors(
@@ -50,24 +52,49 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
         return allMembers.filter(m => selectedIds.has(m.id));
     }, [allMembers, selectedIds]);
 
+    const winStatsMap = useMemo(() => computeWinStatsForMembers(history), [history]);
+    const participationMap = useMemo(() => computeParticipationForMembers(history), [history]);
+
     const sortedMembers = useMemo(() => {
         const members = [...allMembers];
-        switch (sortBy) {
-            case 'name':
-                return members.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-            case 'position':
-                const posOrder = { 'PG': 1, 'SG': 2, 'SF': 3, 'PF': 4, 'C': 5 };
-                return members.sort((a, b) => (posOrder[a.position as keyof typeof posOrder] || 99) - (posOrder[b.position as keyof typeof posOrder] || 99));
-            case 'height':
-                return members.sort((a, b) => b.height - a.height);
-            case 'number':
-                return members.sort((a, b) => a.number - b.number);
-            case 'age':
-                return members.sort((a, b) => a.age - b.age);
-            default:
-                return members;
+        const posIndex = new Map<Position, number>(POSITIONS.map((p, i) => [p as Position, i]));
+
+        if (sortBy === 'positionAsc' || sortBy === 'positionDesc') {
+            return members.sort((a, b) => {
+                const ai = posIndex.get(a.position as Position) ?? 999;
+                const bi = posIndex.get(b.position as Position) ?? 999;
+                if (ai !== bi) return sortBy === 'positionAsc' ? ai - bi : bi - ai;
+                return (a.number ?? 0) - (b.number ?? 0);
+            });
         }
-    }, [allMembers, sortBy]);
+
+        if (sortBy === 'winRateDesc' || sortBy === 'winRateAsc') {
+            return members.sort((a, b) => {
+                const ar = winStatsMap[a.id]?.winRate ?? -1;
+                const br = winStatsMap[b.id]?.winRate ?? -1;
+                if (ar !== br) return sortBy === 'winRateDesc' ? br - ar : ar - br;
+                const ag = winStatsMap[a.id]?.games ?? 0;
+                const bg = winStatsMap[b.id]?.games ?? 0;
+                if (ag !== bg) return bg - ag;
+                return (a.number ?? 0) - (b.number ?? 0);
+            });
+        }
+
+        if (sortBy === 'participationDesc' || sortBy === 'participationAsc') {
+            return members.sort((a, b) => {
+                const ar = participationMap[a.id]?.participationRate ?? -1;
+                const br = participationMap[b.id]?.participationRate ?? -1;
+                if (ar !== br) return sortBy === 'participationDesc' ? br - ar : ar - br;
+                const ap = participationMap[a.id]?.eventsPlayed ?? 0;
+                const bp = participationMap[b.id]?.eventsPlayed ?? 0;
+                if (ap !== bp) return bp - ap;
+                return (a.number ?? 0) - (b.number ?? 0);
+            });
+        }
+
+        // default
+        return members;
+    }, [allMembers, sortBy, winStatsMap, participationMap]);
 
     const MAX_SELECTED = 18;
 
@@ -292,11 +319,12 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                         style={{ width: 'auto' }}
                     >
                         <option value="default">기본 순서</option>
-                        <option value="name">이름순</option>
-                        <option value="position">포지션순</option>
-                        <option value="height">키 순 (높은순)</option>
-                        <option value="number">등번호순</option>
-                        <option value="age">나이순</option>
+                        <option value="positionAsc">포지션별 (PG→C)</option>
+                        <option value="positionDesc">포지션별 (C→PG)</option>
+                        <option value="winRateDesc">승률 높은 순</option>
+                        <option value="winRateAsc">승률 낮은 순</option>
+                        <option value="participationDesc">참석률 높은 순</option>
+                        <option value="participationAsc">참석률 낮은 순</option>
                     </select>
                 </div>
             </div>
