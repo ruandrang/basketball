@@ -500,8 +500,8 @@ function calculateTeamStats(teams: any[], matches: Match[]) {
 }
 
 function formatKoreanDate(dateIso: string) {
-    // 요일까지만 (시간 제거)
     return new Date(dateIso).toLocaleDateString('ko-KR', {
+        timeZone: 'Asia/Seoul',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -510,11 +510,8 @@ function formatKoreanDate(dateIso: string) {
 }
 
 function toYmd(dateIso: string): string {
-    const d = new Date(dateIso);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+    // en-CA locale는 YYYY-MM-DD 형식을 반환
+    return new Date(dateIso).toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' });
 }
 
 function getColorHex(color: TeamColor): string {

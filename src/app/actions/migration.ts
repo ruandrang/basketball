@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { saveHistory, updateClub, addMember } from '@/lib/storage';
 import { Club } from '@/lib/types';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const CLUBS_FILE = path.join(DATA_DIR, 'clubs.json');
@@ -32,6 +32,10 @@ export async function migrateToSupabase() {
             }
         }
 
+        for (const club of clubs) {
+            updateTag(`club:${club.id}`);
+        }
+        updateTag('clubs:list');
         revalidatePath('/');
         return { success: true, message: `${clubs.length}개의 클럽 데이터가 성공적으로 이전되었습니다.` };
     } catch (error) {

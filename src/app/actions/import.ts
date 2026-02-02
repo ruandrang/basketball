@@ -21,7 +21,8 @@ export async function importMembers(clubId: string, csvData: string) {
         const name = values[0].trim();
         const age = parseInt(values[1].trim()) || 0;
         const height = parseInt(values[2].trim()) || 0;
-        const position = (values[3].trim() as Position) || 'Forward';
+        const rawPos = values[3].trim();
+        const position: Position = ['PG', 'SG', 'SF', 'PF', 'C'].includes(rawPos) ? (rawPos as Position) : 'SF';
         const number = parseInt(values[4].trim()) || 0;
 
         await execute(

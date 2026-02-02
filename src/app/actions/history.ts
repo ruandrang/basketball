@@ -4,6 +4,13 @@ import { saveHistory, deleteHistory as dbDeleteHistory, updateHistoryDate as dbU
 import { Team, HistoryRecord } from '@/lib/types';
 import { revalidatePath, updateTag } from 'next/cache';
 
+function nowKST(): string {
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${kst.getUTCFullYear()}-${pad(kst.getUTCMonth() + 1)}-${pad(kst.getUTCDate())}T${pad(kst.getUTCHours())}:${pad(kst.getUTCMinutes())}:${pad(kst.getUTCSeconds())}+09:00`;
+}
+
 export async function saveTeamHistory(clubId: string, teams: Team[]) {
     const recordId = crypto.randomUUID();
     const matches = teams.length === 2
@@ -16,7 +23,7 @@ export async function saveTeamHistory(clubId: string, teams: Team[]) {
 
     const newRecord: HistoryRecord = {
         id: recordId,
-        date: new Date().toISOString(),
+        date: nowKST(),
         teams: teams,
         matches,
     };

@@ -427,7 +427,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
 function getColorHex(color: TeamColor): string {
     const colorMap: Record<TeamColor, string> = {
         'White': '#FFFFFF',
-        'Black': '#000000',
+        'Black': '#333333',
         'Red': '#EF4444',
         'Blue': '#3B82F6',
         'Yellow': '#FBBF24',

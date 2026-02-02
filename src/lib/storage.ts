@@ -3,16 +3,28 @@ import { Club, Member, HistoryRecord, Team, Match } from './types';
 
 export async function getClubs(): Promise<Club[]> {
     try {
-        const clubs = await query<{ id: string; name: string; created_at: string }>(
+        const clubs = await query<{ id: string; name: string }>(
             'SELECT * FROM clubs ORDER BY created_at DESC'
         );
+        if (clubs.length === 0) return [];
 
-        const result: Club[] = [];
-        for (const club of clubs) {
-            const fullClub = await getClub(club.id);
-            if (fullClub) result.push(fullClub);
+        // 모든 클럽의 멤버를 한 번에 조회 (히스토리는 홈 페이지에서 불필요)
+        const members = await query<any>(
+            'SELECT * FROM members ORDER BY sort_order ASC, created_at ASC'
+        );
+
+        const membersByClub = new Map<string, any[]>();
+        for (const m of members) {
+            if (!membersByClub.has(m.club_id)) membersByClub.set(m.club_id, []);
+            membersByClub.get(m.club_id)!.push(m);
         }
-        return result;
+
+        return clubs.map(club => ({
+            id: club.id,
+            name: club.name,
+            members: (membersByClub.get(club.id) || []).map(transformMember),
+            history: [],
+        }));
     } catch (e) {
         console.error('데이터베이스 연결 실패:', e);
         return [];
@@ -27,6 +39,7 @@ export async function getClub(id: string): Promise<Club | undefined> {
         );
         if (!club) return undefined;
 
+        // 6개 쿼리로 클럽 전체 데이터를 배치 조회 (루프 내 쿼리 제거)
         const members = await query<any>(
             'SELECT * FROM members WHERE club_id = $1 ORDER BY sort_order ASC, created_at ASC',
             [id]
@@ -37,57 +50,83 @@ export async function getClub(id: string): Promise<Club | undefined> {
             [id]
         );
 
-        const history: HistoryRecord[] = [];
-        for (const hr of historyRecords) {
-            const teams = await query<any>(
-                'SELECT * FROM teams WHERE history_id = $1 ORDER BY team_order',
-                [hr.id]
-            );
+        const allTeams = await query<any>(
+            `SELECT t.* FROM teams t
+             JOIN history_records hr ON t.history_id = hr.id
+             WHERE hr.club_id = $1
+             ORDER BY t.team_order`,
+            [id]
+        );
 
-            const teamsWithMembers: Team[] = [];
-            for (const team of teams) {
-                const teamMemberIds = await query<{ member_id: string }>(
-                    'SELECT member_id FROM team_members WHERE team_id = $1',
-                    [team.id]
-                );
-                const teamMembers = members.filter((m: any) =>
-                    teamMemberIds.some(tm => tm.member_id === m.id)
-                );
+        const allTeamMembers = await query<{ team_id: string; member_id: string }>(
+            `SELECT tm.team_id, tm.member_id FROM team_members tm
+             JOIN teams t ON tm.team_id = t.id
+             JOIN history_records hr ON t.history_id = hr.id
+             WHERE hr.club_id = $1`,
+            [id]
+        );
 
-                teamsWithMembers.push({
-                    id: team.id,
-                    name: team.name || '',
-                    color: team.color || 'White',
-                    members: teamMembers.map(transformMember),
-                    averageHeight: Number(team.average_height || 0)
-                });
-            }
+        const allMatches = await query<any>(
+            `SELECT * FROM matches
+             WHERE history_id IN (SELECT id FROM history_records WHERE club_id = $1)`,
+            [id]
+        );
 
-            const matches = await query<any>(
-                'SELECT * FROM matches WHERE history_id = $1',
-                [hr.id]
-            );
+        // 메모리에서 그룹화
+        const memberMap = new Map<string, any>();
+        for (const m of members) memberMap.set(m.id, m);
 
-            history.push({
+        const teamsByHistory = new Map<string, any[]>();
+        for (const t of allTeams) {
+            if (!teamsByHistory.has(t.history_id)) teamsByHistory.set(t.history_id, []);
+            teamsByHistory.get(t.history_id)!.push(t);
+        }
+
+        const memberIdsByTeam = new Map<string, string[]>();
+        for (const tm of allTeamMembers) {
+            if (!memberIdsByTeam.has(tm.team_id)) memberIdsByTeam.set(tm.team_id, []);
+            memberIdsByTeam.get(tm.team_id)!.push(tm.member_id);
+        }
+
+        const matchesByHistory = new Map<string, any[]>();
+        for (const m of allMatches) {
+            if (!matchesByHistory.has(m.history_id)) matchesByHistory.set(m.history_id, []);
+            matchesByHistory.get(m.history_id)!.push(m);
+        }
+
+        // 조회 결과 조립
+        const history: HistoryRecord[] = historyRecords.map((hr: any) => {
+            const teams: Team[] = (teamsByHistory.get(hr.id) || []).map((team: any) => ({
+                id: team.id,
+                name: team.name || '',
+                color: team.color || 'White',
+                members: (memberIdsByTeam.get(team.id) || [])
+                    .map(mid => memberMap.get(mid))
+                    .filter(Boolean)
+                    .map(transformMember),
+                averageHeight: Number(team.average_height || 0),
+            }));
+
+            const matches = (matchesByHistory.get(hr.id) || []).map((m: any) => ({
+                id: m.id,
+                team1Id: m.team1_id,
+                team2Id: m.team2_id,
+                result: m.result,
+            }));
+
+            return {
                 id: hr.id,
                 date: hr.date || new Date().toISOString(),
-                teams: teamsWithMembers,
-                matches: matches.length > 0
-                    ? matches.map((m: any) => ({
-                        id: m.id,
-                        team1Id: m.team1_id,
-                        team2Id: m.team2_id,
-                        result: m.result
-                    }))
-                    : undefined
-            });
-        }
+                teams,
+                matches: matches.length > 0 ? matches : undefined,
+            };
+        });
 
         return {
             id: club.id,
             name: club.name,
             members: members.map(transformMember),
-            history
+            history,
         };
     } catch (e) {
         console.error('클럽 조회 중 예외 발생:', e);
@@ -105,12 +144,6 @@ function transformMember(m: any): Member {
         number: m.number || 0,
         sortOrder: m.sort_order ?? 0,
     };
-}
-
-export async function saveClubs(clubs: Club[]): Promise<void> {
-    for (const club of clubs) {
-        await updateClub(club);
-    }
 }
 
 export async function updateClub(updatedClub: Club): Promise<void> {

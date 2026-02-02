@@ -45,5 +45,4 @@ export const {
   deleteHistory,
   updateHistoryDate,
   replaceMatchResults,
-  saveClubs,
 } = storage;

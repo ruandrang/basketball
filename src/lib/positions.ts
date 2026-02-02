@@ -1,5 +1,7 @@
+import type { Position } from './types';
+
+export type { Position };
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
-export type Position = (typeof POSITIONS)[number];
 
 export const POSITION_LABEL_KO: Record<Position, string> = {
   PG: '포인트 가드',

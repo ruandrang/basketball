@@ -36,7 +36,6 @@ export interface HistoryRecord {
 export interface Club {
     id: string;
     name: string;
-    logoUrl?: string; // /uploads/logo-id.png or null for placeholder
     members: Member[];
     history: HistoryRecord[];
 }

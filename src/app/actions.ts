@@ -1,7 +1,7 @@
 'use server'
 
-import { revalidatePath } from 'next/cache';
-import { addMember as dbAddMember, updateMember as dbUpdateMember, deleteMember as dbDeleteMember, updateMemberSortOrders } from '@/lib/storage';
+import { revalidatePath, updateTag } from 'next/cache';
+import { addMember as dbAddMember, updateMember as dbUpdateMember, deleteMember as dbDeleteMember, updateMemberSortOrders } from '@/lib/cached-storage';
 import { Member, Position } from '@/lib/types';
 
 export async function addMember(clubId: string, formData: FormData) {
@@ -18,6 +18,7 @@ export async function addMember(clubId: string, formData: FormData) {
     };
 
     await dbAddMember(clubId, newMember);
+    updateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/members`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
@@ -33,17 +34,20 @@ export async function updateMember(clubId: string, memberId: string, formData: F
     };
 
     await dbUpdateMember(updatedMember);
+    updateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/members`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
 
 export async function deleteMember(clubId: string, memberId: string) {
     await dbDeleteMember(memberId);
+    updateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/members`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }
 
 export async function reorderMembers(clubId: string, orderedMemberIds: string[]) {
     await updateMemberSortOrders(clubId, orderedMemberIds);
+    updateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/members`);
 }
