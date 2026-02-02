@@ -1,6 +1,5 @@
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound, redirect } from 'next/navigation';
-import { checkClubAccess } from '@/lib/auth';
+import { notFound } from 'next/navigation';
 import StatsDisplay from '@/components/StatsDisplay';
 
 export const dynamic = 'force-dynamic';
@@ -17,20 +16,18 @@ export default async function ClubStatsPage({ params }: PageProps) {
         notFound();
     }
 
-    const hasAccess = await checkClubAccess(club.ownerId);
-    if (!hasAccess) {
-        redirect('/');
-    }
-
     return (
-        <main className="container" style={{ padding: '2rem 0' }}>
-            <div style={{ marginBottom: '1rem' }}>
-                <a href={`/clubs/${club.id}/dashboard`} style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                    ← {club.name} 대시보드로
-                </a>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+            <div>
+                <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--spacing-sm)' }}>
+                    통계
+                </h1>
+                <p style={{ color: 'var(--gray-500)', fontSize: 'var(--text-sm)' }}>
+                    선수별 경기 기록과 승률을 확인하세요.
+                </p>
             </div>
-            <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '2rem' }}>통계</h1>
+
             <StatsDisplay members={club.members} history={club.history} />
-        </main>
+        </div>
     );
 }

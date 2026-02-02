@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound, redirect } from 'next/navigation';
-import { checkClubAccess } from '@/lib/auth';
+import { notFound } from 'next/navigation';
 import TeamGenerator from '@/components/TeamGenerator';
 
 export const dynamic = 'force-dynamic';
@@ -18,19 +16,18 @@ export default async function ClubGeneratePage({ params }: PageProps) {
         notFound();
     }
 
-    const hasAccess = await checkClubAccess(club.ownerId);
-    if (!hasAccess) {
-        redirect('/');
-    }
-
     return (
-        <main className="container" style={{ padding: '2rem 0' }}>
-            <div style={{ marginBottom: '1rem' }}>
-                <Link href={`/clubs/${club.id}/dashboard`} style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                    ← {club.name} 대시보드로
-                </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+            <div>
+                <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--spacing-sm)' }}>
+                    팀 구성
+                </h1>
+                <p style={{ color: 'var(--gray-500)', fontSize: 'var(--text-sm)' }}>
+                    멤버를 선택하고 균형 잡힌 팀을 자동으로 생성합니다.
+                </p>
             </div>
+
             <TeamGenerator clubId={club.id} allMembers={club.members} history={club.history} />
-        </main>
+        </div>
     );
 }

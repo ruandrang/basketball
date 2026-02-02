@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { login } from '@/app/actions/auth';
+import styles from './page.module.css';
 
 export default async function LoginPage({
   searchParams,
@@ -9,72 +11,63 @@ export default async function LoginPage({
   const error = sp.error === '1';
 
   return (
-    <main className="container" style={{ padding: '2rem 0' }}>
-      <div className="card" style={{ maxWidth: 420, margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>로그인</h1>
-        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-          Basketball Club Manager에 로그인하세요
-        </p>
-
-        {error && (
-          <div
-            className="card"
-            style={{
-              borderColor: 'rgba(255, 107, 107, 0.35)',
-              background: 'rgba(255, 107, 107, 0.08)',
-              marginBottom: '1rem',
-            }}
-          >
-            아이디 또는 비밀번호가 올바르지 않습니다.
-          </div>
-        )}
-
-        <form action={login} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>아이디</label>
-            <input
-              name="id"
-              autoComplete="username"
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-bg-primary)',
-                color: 'white',
-              }}
-            />
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.card}>
+          {/* Logo */}
+          <div className={styles.logo}>
+            <span className={styles.logoIcon}>🏀</span>
+            <span className={styles.logoText}>Basketball Manager</span>
           </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)' }}>비밀번호</label>
-            <input
-              name="pw"
-              type="password"
-              autoComplete="current-password"
-              required
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--color-border)',
-                background: 'var(--color-bg-primary)',
-                color: 'white',
-              }}
-            />
+          <h1 className={styles.title}>로그인</h1>
+          <p className={styles.subtitle}>
+            계정에 로그인하여 클럽을 관리하세요
+          </p>
+
+          {error && (
+            <div className={styles.error}>
+              아이디 또는 비밀번호가 올바르지 않습니다.
+            </div>
+          )}
+
+          <form action={login} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>아이디</label>
+              <input
+                name="id"
+                autoComplete="username"
+                required
+                className="input"
+                placeholder="아이디를 입력하세요"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>비밀번호</label>
+              <input
+                name="pw"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="input"
+                placeholder="비밀번호를 입력하세요"
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }}>
+              로그인
+            </button>
+          </form>
+
+          <div className={styles.footer}>
+            계정이 없으신가요?{' '}
+            <Link href="/signup" className={styles.link}>
+              회원가입
+            </Link>
           </div>
-
-          <button type="submit" className="btn btn-primary">로그인</button>
-        </form>
-
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-          계정이 없으신가요?{' '}
-          <a href="/signup" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
-            회원가입
-          </a>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

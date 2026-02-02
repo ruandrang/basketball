@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { updateClubName, deleteClub } from '@/app/actions/club';
 import { HistoryRecord } from '@/lib/types';
 import HistoryList from '@/components/HistoryList';
+import styles from './ClubDashboardClient.module.css';
 
 interface ClubDashboardClientProps {
     clubId: string;
@@ -58,115 +60,150 @@ export default function ClubDashboardClient({ clubId, clubName, memberCount, his
         }
     };
 
+    // Calculate stats
+    const totalMatches = history.reduce((acc, record) => acc + (record.matches?.length || 0), 0);
+    const thisMonthHistory = history.filter(record => {
+        const date = new Date(record.date);
+        const now = new Date();
+        return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    });
+
     return (
-        <main className="container" style={{ padding: '2rem 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ fontSize: '3rem' }}>🏀</div>
-                <div style={{ flex: 1 }}>
+        <div className={styles.dashboard}>
+            {/* Header */}
+            <div className={styles.header}>
+                <div className={styles.headerContent}>
                     {isEditing ? (
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <div className={styles.editForm}>
                             <input
+                                className={`input ${styles.editInput}`}
                                 value={editedName}
                                 onChange={(e) => setEditedName(e.target.value)}
-                                style={{
-                                    fontSize: '2.5rem',
-                                    fontWeight: 800,
-                                    background: 'var(--color-bg-primary)',
-                                    border: '2px solid var(--color-accent-primary)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    padding: '0.25rem 0.5rem',
-                                    color: 'white',
-                                    flex: 1
-                                }}
                                 autoFocus
                             />
-                            <button className="btn btn-primary" onClick={handleSave} disabled={isSaving} style={{ fontSize: '0.9rem' }}>
+                            <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={isSaving}>
                                 {isSaving ? '저장 중...' : '저장'}
                             </button>
-                            <button className="btn btn-secondary" onClick={handleCancel} disabled={isSaving} style={{ fontSize: '0.9rem' }}>
+                            <button className="btn btn-secondary btn-sm" onClick={handleCancel} disabled={isSaving}>
                                 취소
                             </button>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <h1 className="text-gradient" style={{ fontSize: '2.5rem', lineHeight: 1 }}>
-                                {clubName}
-                            </h1>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button
-                                    className="btn btn-secondary"
-                                    onClick={() => setIsEditing(true)}
-                                    style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
-                                >
-                                    ✏️ 이름 수정
+                        <>
+                            <h1 className={styles.title}>{clubName}</h1>
+                            <div className={styles.headerActions}>
+                                <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(true)}>
+                                    이름 수정
                                 </button>
                                 <button
-                                    className="btn"
+                                    className="btn btn-danger btn-sm"
                                     onClick={handleDelete}
                                     disabled={isDeleting}
-                                    style={{
-                                        fontSize: '0.85rem',
-                                        padding: '0.5rem 1rem',
-                                        background: '#DC2626',
-                                        border: '2px solid #EF4444',
-                                        color: 'white',
-                                        fontWeight: 'bold',
-                                        opacity: isDeleting ? 0.5 : 1,
-                                        cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                        transition: 'all 0.2s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isDeleting) {
-                                            e.currentTarget.style.background = '#B91C1C';
-                                            e.currentTarget.style.transform = 'scale(1.02)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isDeleting) {
-                                            e.currentTarget.style.background = '#DC2626';
-                                            e.currentTarget.style.transform = 'scale(1)';
-                                        }
-                                    }}
                                 >
-                                    {isDeleting ? '삭제 중...' : '🗑️ 클럽 삭제'}
+                                    {isDeleting ? '삭제 중...' : '클럽 삭제'}
                                 </button>
                             </div>
-                        </div>
+                        </>
                     )}
-                    <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}>
-                        멤버 {memberCount}명 • 기록 {history.length}건
-                    </p>
                 </div>
             </div>
 
-            <div className="card">
-                <h2>대시보드</h2>
-                <p>원하는 작업을 선택하세요.</p>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                    <a href={`/clubs/${clubId}/generate`} className="btn btn-primary" style={{ textDecoration: 'none' }}>
-                        팀 생성하기 (Generate)
-                    </a>
-                    <a href={`/clubs/${clubId}/members`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-                        멤버 관리 (Members)
-                    </a>
-                    <a href={`/clubs/${clubId}/stats`} className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-                        통계 (Statistics)
-                    </a>
-                </div>
-            </div>
-
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h2>이전 기록</h2>
-                {history.length === 0 ? (
-                    <p style={{ color: 'var(--color-text-secondary)', textAlign: 'center', padding: '2rem 0' }}>
-                        기록이 없습니다. 팀을 생성해 보세요.
-                    </p>
-                ) : (
-                    <div style={{ marginTop: '1rem' }}>
-                        <HistoryList history={history} clubId={clubId} clubName={clubName} />
+            {/* Stats Cards */}
+            <div className={styles.statsGrid}>
+                <div className={styles.statCard}>
+                    <div className={`${styles.statIcon} ${styles.statIconPrimary}`}>👥</div>
+                    <div className={styles.statContent}>
+                        <div className={styles.statLabel}>총 멤버</div>
+                        <div className={styles.statValue}>{memberCount}명</div>
                     </div>
+                </div>
+
+                <div className={styles.statCard}>
+                    <div className={`${styles.statIcon} ${styles.statIconSuccess}`}>📋</div>
+                    <div className={styles.statContent}>
+                        <div className={styles.statLabel}>총 기록</div>
+                        <div className={styles.statValue}>{history.length}건</div>
+                    </div>
+                </div>
+
+                <div className={styles.statCard}>
+                    <div className={`${styles.statIcon} ${styles.statIconWarning}`}>🏀</div>
+                    <div className={styles.statContent}>
+                        <div className={styles.statLabel}>총 경기</div>
+                        <div className={styles.statValue}>{totalMatches}경기</div>
+                    </div>
+                </div>
+
+                <div className={styles.statCard}>
+                    <div className={`${styles.statIcon} ${styles.statIconInfo}`}>📅</div>
+                    <div className={styles.statContent}>
+                        <div className={styles.statLabel}>이번 달</div>
+                        <div className={styles.statValue}>{thisMonthHistory.length}회</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className={styles.section}>
+                <h2 className={styles.sectionTitle}>빠른 작업</h2>
+                <div className={styles.quickActions}>
+                    <Link href={`/clubs/${clubId}/generate`} className={styles.actionCard}>
+                        <div className={styles.actionIcon}>👕</div>
+                        <div className={styles.actionContent}>
+                            <h3>팀 생성하기</h3>
+                            <p>멤버를 선택하고 균형 잡힌 팀을 만들어보세요</p>
+                        </div>
+                        <span className={styles.actionArrow}>→</span>
+                    </Link>
+
+                    <Link href={`/clubs/${clubId}/members`} className={styles.actionCard}>
+                        <div className={styles.actionIcon}>👥</div>
+                        <div className={styles.actionContent}>
+                            <h3>멤버 관리</h3>
+                            <p>멤버를 추가, 수정, 삭제하세요</p>
+                        </div>
+                        <span className={styles.actionArrow}>→</span>
+                    </Link>
+
+                    <Link href={`/clubs/${clubId}/stats`} className={styles.actionCard}>
+                        <div className={styles.actionIcon}>📊</div>
+                        <div className={styles.actionContent}>
+                            <h3>통계 보기</h3>
+                            <p>선수별 성적과 승률을 확인하세요</p>
+                        </div>
+                        <span className={styles.actionArrow}>→</span>
+                    </Link>
+                </div>
+            </div>
+
+            {/* Recent History */}
+            <div className={styles.section}>
+                <div className={styles.sectionHeader}>
+                    <h2 className={styles.sectionTitle}>이전 기록</h2>
+                    {history.length > 0 && (
+                        <Link href={`/clubs/${clubId}/history`} className={styles.viewAllLink}>
+                            전체 보기 →
+                        </Link>
+                    )}
+                </div>
+
+                {history.length === 0 ? (
+                    <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}>📭</div>
+                        <h3>기록이 없습니다</h3>
+                        <p>팀을 생성해 보세요.</p>
+                        <Link href={`/clubs/${clubId}/generate`} className="btn btn-primary">
+                            팀 생성하기
+                        </Link>
+                    </div>
+                ) : (
+                    <HistoryList
+                        history={history.slice(0, 5)}
+                        clubId={clubId}
+                        clubName={clubName}
+                    />
                 )}
             </div>
-        </main>
+        </div>
     );
 }

@@ -1,7 +1,5 @@
-import Link from 'next/link';
 import { getClubCached as getClub } from '@/lib/cached-storage';
-import { notFound, redirect } from 'next/navigation';
-import { checkClubAccess } from '@/lib/auth';
+import { notFound } from 'next/navigation';
 import HistoryList from '@/components/HistoryList';
 
 export const dynamic = 'force-dynamic';
@@ -18,20 +16,31 @@ export default async function ClubHistoryPage({ params }: PageProps) {
         notFound();
     }
 
-    const hasAccess = await checkClubAccess(club.ownerId);
-    if (!hasAccess) {
-        redirect('/');
-    }
-
     return (
-        <main className="container" style={{ padding: '2rem 0' }}>
-            <div style={{ marginBottom: '1rem' }}>
-                <Link href={`/clubs/${club.id}/dashboard`} style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                    ← {club.name} 대시보드로
-                </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+            <div>
+                <h1 style={{ fontSize: 'var(--text-2xl)', fontWeight: 700, marginBottom: 'var(--spacing-sm)' }}>
+                    경기 기록
+                </h1>
+                <p style={{ color: 'var(--gray-500)', fontSize: 'var(--text-sm)' }}>
+                    이전 팀 구성과 경기 결과를 확인하세요.
+                </p>
             </div>
-            <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '2rem' }}>경기 기록</h1>
-            <HistoryList history={club.history} clubId={club.id} clubName={club.name} />
-        </main>
+
+            {club.history.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center', padding: 'var(--spacing-2xl)' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: 'var(--spacing-md)' }}>📭</div>
+                    <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>기록이 없습니다</h3>
+                    <p style={{ color: 'var(--gray-500)', marginBottom: 'var(--spacing-lg)' }}>
+                        팀을 생성하면 여기에 기록됩니다.
+                    </p>
+                    <a href={`/clubs/${club.id}/generate`} className="btn btn-primary">
+                        팀 생성하기
+                    </a>
+                </div>
+            ) : (
+                <HistoryList history={club.history} clubId={club.id} clubName={club.name} />
+            )}
+        </div>
     );
 }
