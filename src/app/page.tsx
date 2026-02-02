@@ -15,6 +15,7 @@ export default async function Home() {
   }
 
   const allClubs = await getClubs();
+
   const clubs = currentUser.isAdmin
     ? allClubs
     : allClubs.filter(club => club.ownerId && club.ownerId === currentUser.id);
