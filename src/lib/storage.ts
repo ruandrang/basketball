@@ -33,9 +33,14 @@ export async function getClubs(): Promise<Club[]> {
         );
         if (clubs.length === 0) return [];
 
-        // 모든 클럽의 멤버를 한 번에 조회 (히스토리는 홈 페이지에서 불필요)
+        // 모든 클럽의 멤버를 한 번에 조회
         const members = await query<any>(
             'SELECT * FROM members ORDER BY sort_order ASC, created_at ASC'
+        );
+
+        // 히스토리 기록 수 조회 (전체 데이터 불필요, 카운트만)
+        const historyRecords = await query<{ id: string; club_id: string }>(
+            'SELECT id, club_id FROM history_records'
         );
 
         const membersByClub = new Map<string, any[]>();
@@ -44,12 +49,22 @@ export async function getClubs(): Promise<Club[]> {
             membersByClub.get(m.club_id)!.push(m);
         }
 
+        const historyByClub = new Map<string, { id: string }[]>();
+        for (const hr of historyRecords) {
+            if (!historyByClub.has(hr.club_id)) historyByClub.set(hr.club_id, []);
+            historyByClub.get(hr.club_id)!.push({ id: hr.id });
+        }
+
         return clubs.map(club => ({
             id: club.id,
             name: club.name,
             ownerId: club.owner_id || undefined,
             members: (membersByClub.get(club.id) || []).map(transformMember),
-            history: [],
+            history: (historyByClub.get(club.id) || []).map(hr => ({
+                id: hr.id,
+                date: '',
+                teams: [],
+            })),
         }));
     } catch (e) {
         console.error('데이터베이스 연결 실패:', e);

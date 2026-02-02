@@ -37,6 +37,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
     const [teamColors3, setTeamColors3] = useState<[TeamColor, TeamColor, TeamColor]>(['White', 'Black', 'Red']);
     const [generatedTeams, setGeneratedTeams] = useState<Team[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [sortBy, setSortBy] = useState<'default' | 'name' | 'position' | 'height' | 'number' | 'age'>('default');
 
     // dnd-kit (works on mobile)
     const sensors = useSensors(
@@ -48,6 +49,25 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
     const totalSelectedMembers = useMemo(() => {
         return allMembers.filter(m => selectedIds.has(m.id));
     }, [allMembers, selectedIds]);
+
+    const sortedMembers = useMemo(() => {
+        const members = [...allMembers];
+        switch (sortBy) {
+            case 'name':
+                return members.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            case 'position':
+                const posOrder = { 'PG': 1, 'SG': 2, 'SF': 3, 'PF': 4, 'C': 5 };
+                return members.sort((a, b) => (posOrder[a.position as keyof typeof posOrder] || 99) - (posOrder[b.position as keyof typeof posOrder] || 99));
+            case 'height':
+                return members.sort((a, b) => b.height - a.height);
+            case 'number':
+                return members.sort((a, b) => a.number - b.number);
+            case 'age':
+                return members.sort((a, b) => a.age - b.age);
+            default:
+                return members;
+        }
+    }, [allMembers, sortBy]);
 
     const MAX_SELECTED = 18;
 
@@ -68,7 +88,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
     };
 
     const handleSelectAll = () => {
-        const ids = allMembers.slice(0, MAX_SELECTED).map(m => m.id);
+        const ids = sortedMembers.slice(0, MAX_SELECTED).map(m => m.id);
         setSelectedIds(new Set(ids));
     };
 
@@ -258,13 +278,26 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                         선택됨: <strong style={{ color: selectedCount === 18 ? 'var(--color-success)' : 'var(--gray-900)' }}>{selectedCount}</strong> / 18
                     </p>
                 </div>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button className="btn btn-secondary" type="button" onClick={handleSelectAll}>
                         전체 선택(18명)
                     </button>
                     <button className="btn btn-secondary" type="button" onClick={handleClearAll}>
                         전체 해제
                     </button>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                        className="select"
+                        style={{ width: 'auto' }}
+                    >
+                        <option value="default">기본 순서</option>
+                        <option value="name">이름순</option>
+                        <option value="position">포지션순</option>
+                        <option value="height">키 순 (높은순)</option>
+                        <option value="number">등번호순</option>
+                        <option value="age">나이순</option>
+                    </select>
                 </div>
             </div>
 
@@ -360,7 +393,7 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                {allMembers.map(member => (
+                {sortedMembers.map(member => (
                     <div
                         key={member.id}
                         className="card"
