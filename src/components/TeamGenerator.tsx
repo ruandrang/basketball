@@ -263,7 +263,12 @@ export default function TeamGenerator({ clubId, allMembers, history }: TeamGener
                             재생성
                         </button>
                         <button className="btn btn-primary" onClick={handleSave} disabled={isSaving}>
-                            {isSaving ? '저장 중...' : '결과 저장'}
+                            {isSaving ? (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span className="spinner spinner-sm" aria-hidden />
+                                    저장 중...
+                                </span>
+                            ) : '결과 저장'}
                         </button>
                     </div>
                 </div>

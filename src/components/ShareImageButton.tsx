@@ -72,7 +72,12 @@ export default function ShareImageButton({
 
   return (
     <button className="btn btn-secondary" onClick={download} disabled={busy}>
-      {busy ? '생성 중...' : label}
+      {busy ? (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span className="spinner spinner-sm" aria-hidden />
+          생성 중...
+        </span>
+      ) : label}
     </button>
   );
 }

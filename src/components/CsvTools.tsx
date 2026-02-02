@@ -62,8 +62,13 @@ export default function CsvTools({ clubId, members }: CsvToolsProps) {
             <button className="btn btn-secondary" onClick={handleExport} style={{ fontSize: '0.9rem' }}>
                 📥 CSV 내보내기
             </button>
-            <label className="btn btn-secondary" style={{ fontSize: '0.9rem', cursor: 'pointer' }}>
-                {isImporting ? '⏳ 가져오는 중...' : '📤 CSV 가져오기'}
+            <label className="btn btn-secondary" style={{ fontSize: '0.9rem', cursor: isImporting ? 'wait' : 'pointer' }}>
+                {isImporting ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="spinner spinner-sm" aria-hidden />
+                        가져오는 중...
+                    </span>
+                ) : '📤 CSV 가져오기'}
                 <input type="file" accept=".csv" onChange={handleImport} style={{ display: 'none' }} disabled={isImporting} />
             </label>
         </div>

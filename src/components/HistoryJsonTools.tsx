@@ -58,7 +58,12 @@ export default function HistoryJsonTools({ clubId }: { clubId: string }) {
         />
 
         <button className="btn btn-primary" onClick={upload} disabled={busy || !file}>
-          {busy ? '업로드 중...' : '기록 Import'}
+          {busy ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="spinner spinner-sm" aria-hidden />
+              업로드 중...
+            </span>
+          ) : '기록 Import'}
         </button>
       </div>
 

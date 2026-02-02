@@ -68,7 +68,11 @@ export default function MemberItem({ clubId, member, onEdit }: MemberItemProps) 
                             border: '1px solid transparent'
                         }}
                     >
-                        {isDeleting ? '...' : '삭제'}
+                        {isDeleting ? (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                <span className="spinner spinner-sm" aria-hidden />
+                            </span>
+                        ) : '삭제'}
                     </button>
                 </div>
             </div>

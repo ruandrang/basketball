@@ -18,6 +18,7 @@ const menuItems = [
     { icon: '👕', label: '팀 구성', href: '/generate' },
     { icon: '🏆', label: '경기 기록', href: '/history' },
     { icon: '📊', label: '통계', href: '/stats' },
+    { icon: '💾', label: '데이터 관리', href: '/data' },
 ];
 
 export default function Sidebar({ clubId, clubName, username }: SidebarProps) {

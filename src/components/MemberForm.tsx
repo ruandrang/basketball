@@ -106,7 +106,12 @@ export default function MemberForm({ clubId, initialData, onClose }: MemberFormP
                             취소
                         </button>
                         <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                            {isSubmitting ? '저장 중...' : (initialData ? '수정' : '등록')}
+                            {isSubmitting ? (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span className="spinner spinner-sm" aria-hidden />
+                                    저장 중...
+                                </span>
+                            ) : (initialData ? '수정' : '등록')}
                         </button>
                     </div>
                 </form>

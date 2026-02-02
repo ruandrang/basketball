@@ -204,7 +204,12 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                     disabled={isUpdatingDate}
                                                     style={{ fontSize: '0.85rem' }}
                                                 >
-                                                    {isUpdatingDate ? '저장 중...' : '날짜 저장'}
+                                                    {isUpdatingDate ? (
+                                                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                            <span className="spinner spinner-sm" aria-hidden />
+                                                            저장 중...
+                                                        </span>
+                                                    ) : '날짜 저장'}
                                                 </button>
                                                 <button
                                                     className="btn btn-secondary"
@@ -252,7 +257,12 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                 }
                                             }}
                                         >
-                                            {deletingId === record.id ? '삭제 중...' : '🗑️ 삭제'}
+                                            {deletingId === record.id ? (
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    <span className="spinner spinner-sm" aria-hidden />
+                                                    삭제 중...
+                                                </span>
+                                            ) : '🗑️ 삭제'}
                                         </button>
                                     </div>
                                 )}
@@ -370,7 +380,12 @@ export default function HistoryList({ history, clubId, clubName }: { history: Hi
                                                 disabled={isSubmitting}
                                                 style={{ fontSize: '0.85rem' }}
                                             >
-                                                {isSubmitting ? '저장 중...' : '저장'}
+                                                {isSubmitting ? (
+                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <span className="spinner spinner-sm" aria-hidden />
+                                                        저장 중...
+                                                    </span>
+                                                ) : '저장'}
                                             </button>
                                             <button
                                                 className="btn btn-secondary"
