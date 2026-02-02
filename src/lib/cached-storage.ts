@@ -8,7 +8,11 @@ const DEFAULT_REVALIDATE_SECONDS = Number(process.env.NEXT_PUBLIC_CACHE_TTL_SECO
 
 export const getClubCached = async (id: string): Promise<Club | undefined> => {
   const fn = unstable_cache(
-    async () => storage.getClub(id),
+    async () => {
+      // storage.getClub은 DB 에러 시 throw하고, 클럽이 없을 때만 undefined 반환
+      // throw된 에러는 캐시되지 않음
+      return storage.getClub(id);
+    },
     [`club:${id}`],
     {
       revalidate: DEFAULT_REVALIDATE_SECONDS,

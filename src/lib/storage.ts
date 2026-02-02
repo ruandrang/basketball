@@ -68,7 +68,7 @@ export async function getClubs(): Promise<Club[]> {
         }));
     } catch (e) {
         console.error('데이터베이스 연결 실패:', e);
-        return [];
+        throw new Error('클럽 목록을 불러오는 중 오류가 발생했습니다.');
     }
 }
 
@@ -172,7 +172,8 @@ export async function getClub(id: string): Promise<Club | undefined> {
         };
     } catch (e) {
         console.error('클럽 조회 중 예외 발생:', e);
-        return undefined;
+        // 데이터베이스 에러 시 throw하여 캐시되지 않도록 함
+        throw new Error('클럽 데이터를 불러오는 중 오류가 발생했습니다.');
     }
 }
 
