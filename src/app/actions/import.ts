@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { execute } from '@/lib/db';
 import { Position } from '@/lib/types';
 
@@ -31,7 +31,7 @@ export async function importMembers(clubId: string, csvData: string) {
         );
     }
 
-    revalidateTag(`club:${clubId}`);
+    updateTag(`club:${clubId}`);
     revalidatePath(`/clubs/${clubId}/members`);
     revalidatePath(`/clubs/${clubId}/stats`);
 }

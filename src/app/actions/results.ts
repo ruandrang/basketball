@@ -2,13 +2,13 @@
 
 import { replaceMatchResults } from '@/lib/cached-storage';
 import { Match } from '@/lib/types';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 
 export async function updateMatchResult(clubId: string, recordId: string, matches: Match[]) {
     try {
         await replaceMatchResults(recordId, matches);
 
-        revalidateTag(`club:${clubId}`);
+        updateTag(`club:${clubId}`);
         revalidatePath(`/clubs/${clubId}/history`);
         revalidatePath(`/clubs/${clubId}/stats`);
     } catch (error) {
