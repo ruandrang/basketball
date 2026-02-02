@@ -36,7 +36,7 @@ export async function login(formData: FormData) {
     id: user.id,
     username: user.username,
     displayName: user.displayName,
-    isAdmin: user.id === ADMIN_USER_ID,
+    isAdmin: user.username === 'admin',
   });
 
   redirect('/');
