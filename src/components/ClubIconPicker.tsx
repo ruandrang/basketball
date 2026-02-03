@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import styles from './ClubIconPicker.module.css';
 import { CLUB_ICON_FILES } from '@/lib/club-icons';
@@ -15,7 +16,17 @@ export default function ClubIconPicker({
   defaultValue?: string;
   onChange?: (next: string) => void;
 }) {
-  const current = value ?? defaultValue;
+  // Use internal state for uncontrolled mode
+  const [internalValue, setInternalValue] = useState(defaultValue);
+  const isControlled = value !== undefined;
+  const current = isControlled ? value : internalValue;
+
+  const handleChange = (next: string) => {
+    if (!isControlled) {
+      setInternalValue(next);
+    }
+    onChange?.(next);
+  };
 
   return (
     <div className={styles.wrap}>
@@ -34,9 +45,8 @@ export default function ClubIconPicker({
                 type="radio"
                 name={name}
                 value={file}
-                defaultChecked={defaultValue === file}
-                checked={value !== undefined ? checked : undefined}
-                onChange={(e) => onChange?.(e.target.value)}
+                checked={checked}
+                onChange={(e) => handleChange(e.target.value)}
               />
               <div className={styles.thumb}>
                 <Image src={`/club-icons/${file}`} alt={file} width={56} height={56} />
